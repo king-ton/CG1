@@ -1,0 +1,108 @@
+#ifndef CG_PROGRAMINTERFACE_H
+#define CG_PROGRAMINTERFACE_H
+
+#include "CG.h"
+#include "CGMatrix.h"
+#include "CGTexture.h"
+
+//---------------------------------------------------------------------------
+
+/// Locations to access the builtin Uniforms
+enum CGUniformLocations
+{
+	CG_ULOC_PROJECTION_MATRIX=0,
+	CG_ULOC_MODELVIEW_MATRIX,
+	CG_ULOC_NORMAL_MATRIX,
+	CG_ULOC_MATERIAL_AMBIENT,
+	CG_ULOC_MATERIAL_DIFFUSE,
+	CG_ULOC_MATERIAL_SPECULAR,
+	CG_ULOC_MATERIAL_SHININESS,
+	CG_ULOC_MATERIAL_EMISSION,
+	CG_ULOC_LIGHT0_AMBIENT,
+	CG_ULOC_LIGHT0_DIFFUSE,
+	CG_ULOC_LIGHT0_SPECULAR,
+	CG_ULOC_LIGHT0_POSITION,
+	CG_ULOC_SAMPLER
+};
+
+#define CG_ATTRIBUTE_COUNT 4
+
+/// Access offsets into attribute data arrays.
+enum CGAttributes
+{
+	CG_POSITION_ATTRIBUTE=0, 
+	CG_NORMAL_ATTRIBUTE, 
+	CG_COLOR_ATTRIBUTE, 
+	CG_TEXCOORD_ATTRIBUTE
+};
+
+#define CG_VARYING_COUNT 5
+
+/// Access offsets into varying data arrays.
+enum CGVaryings
+{
+	CG_POSITION_VARYING=0, 
+	CG_NORMAL_VARYING, 
+	CG_COLOR_VARYING, 
+	CG_TEXCOORD_VARYING,
+	CG_POSITION_EYESPACE_VARYING
+};
+
+/// Vertex attribute container (vertex processing inputs).
+struct CGVertexAttributes
+{
+	CGVec4 attributes[CG_ATTRIBUTE_COUNT];  // Attributes are what is pulled from the attribute pointer.
+};
+
+/// Vertex varying container (vertex processing outputs).
+struct CGVertexVaryings
+{
+	CGVec4 varyings[CG_VARYING_COUNT];      // Varyings are vertex attributes (and more) after vertex program.
+};
+
+/// Fragment data container.
+struct CGFragmentData
+{
+	CGVec2i coordinates;                  // Fragment specific framebuffer coordinate.
+	CGVec4  varyings[CG_VARYING_COUNT];   // Varyings as copied from vertex or interpolated.
+	void set(const CGVertexVaryings& vertex)
+	{
+		for (int i=0; i<CG_VARYING_COUNT; i++)
+			varyings[i].set(vertex.varyings[i]);
+	}
+	void set(const CGVertexVaryings& A, const CGVertexVaryings& B, float ratio)
+	{
+		// interpolation
+		// ...
+	}
+	void set(const CGVertexVaryings& A, const CGVertexVaryings& B, const CGVertexVaryings& C, float a, float b, float c)
+	{
+		// interpolation
+		// ...
+	}
+};
+
+/// Texture sampler.
+struct CGSampler2D
+{
+	int unit;
+	const CGTexture2D *texture;
+};
+
+/// Uniform variables.
+struct CGUniformData
+{
+	CGMatrix4x4 projectionMatrix, modelviewMatrix, normalMatrix;
+	CGVec4 materialAmbient, materialDiffuse, materialSpecular, materialEmission;
+	float materialShininess;
+	CGVec4 light0Ambient, light0Diffuse, light0Specular, light0Position;
+	CGSampler2D sampler;
+};
+
+/// Shader functions
+typedef void (*CGVertexProgram)(const CGVertexAttributes&, CGVertexVaryings&, const CGUniformData&);
+typedef void (*CGFragmentProgram)(const CGFragmentData&, CGVec4&, const CGUniformData&);
+
+//---------------------------------------------------------------------------
+
+#endif
