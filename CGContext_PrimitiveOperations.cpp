@@ -99,14 +99,17 @@ void CGContext::m_cgRasterizePoint(int pipelineVertexOffset)
 	// Push the fragment into the pipeline.
 	m_cgPushFragment(fragment);
 }
+
+//---------------------------------------------------------------------------
+// Übung 01 - Aufgabe 3a  |  Erzeugen einer Linie zwischen 2 Vertices
 //---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeStupidLine(int pipelineVertexOffset)
 {
-	// This primitive produces many fragments from 2 vertices:
+	// Anfangs- und Endpunkte der Linie
 	CGVertexVaryings &vertex0 = m_pipelineVertexVaryings[pipelineVertexOffset+0];
 	CGVertexVaryings &vertex1 = m_pipelineVertexVaryings[pipelineVertexOffset+1];
 
-	// draw a line from vertex0 to vertex1
+	// Zeichne eine Linie zwischen den beiden Vertices
 	CGVec2i from,to;
 
 	from.set((int)vertex0.varyings[CG_POSITION_VARYING][X],
@@ -116,22 +119,33 @@ void CGContext::m_cgRasterizeStupidLine(int pipelineVertexOffset)
 		   (int)vertex1.varyings[CG_POSITION_VARYING][Y]);
 
 	if (from[X] > to[X]) {
-		// swap from and to 
+		// Tausche Anfangs- und Endwert von x
 		CGVec2i tmp;
 		tmp=from;
 		from=to;
 		to=tmp;
 	}
 
-	// Fragment to work on (initialize from vertex, set coordinates, push).
+	// Attribute werden von vertex0 übernommen
 	CGFragmentData fragment;
 	fragment.set(vertex0);
 
-	// draw a line from <from> to <to>
-	// Uebung 01. Aufgabe 3a)
+	// zeichne eine Linie von <from> nach <to>
+	CGVec2i delta;
+	delta[X] = to[X] - from[X];
+	delta[Y] = to[Y] - from[Y];
 
-	// Uebung01, Aufgabe 4a) (Zusatzaufgabe)
-	// ...
+	// verhindert Division durch 0
+	if (delta[X] == 0)
+		delta[X] = 1;
+	float m = (float)delta[Y] / (float)delta[X];
+
+	for (int iX = from[X]; iX <= to[X]; iX++) {
+		int y = (int)((float)(iX - from[X])*m) + from[Y];
+
+		fragment.coordinates.set(iX, y);
+		m_cgPushFragment(fragment);
+	}
 }
 //---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeLineBresenham(int pipelineVertexOffset)

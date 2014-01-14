@@ -20,3 +20,4 @@ _UpgradeReport_Files
 screenshot.*
 *.xml
 .thumbnails
+freeglut.dll

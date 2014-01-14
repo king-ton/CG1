@@ -1,3 +1,6 @@
+// Welche Übung soll ausgeführt werden?
+#define UEBUNG1
+
 // Standard includes.
 #include <stdlib.h>         // for rand()
 #define _USE_MATH_DEFINES
@@ -8,6 +11,10 @@
 #include "CG1Helper.h"
 #include "CGContext.h"
 
+//---------------------------------------------------------------------------
+// Übung 1  |  Implementierung Color-Buffer
+//---------------------------------------------------------------------------
+#ifdef UEBUNG1
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  160   // Framebuffer width.
@@ -34,7 +41,8 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 {
 	out = in.varyings[CG_COLOR_VARYING];
 }
-///---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
 // This is something specifically needed for this application.
 typedef struct
 {
@@ -72,9 +80,17 @@ void programStep_SpringenderPunkt()
 	animateSpringenderPunkt(a);
 	animateSpringenderPunkt(b);
 	
-	// render 
-	// Uebung01, Aufgabe 2a):
-	ourContext->cgClearColor(0.5f, 0.0f, 0.0f, 1.0f);
+	// render
+	///---------------------------------------------------------------------------
+	/// Übung 01 - Aufgabe 2a  |  Setzen der Hintergrundfarbe
+	///---------------------------------------------------------------------------
+	ourContext->cgClearColor(0.5f, 0.0f, 0.0f, 1.0f);	// Rot
+	//ourContext->cgClearColor(1.0f, 1.0f, 0.0f, 1.0f);	// Gelb
+	//ourContext->cgClearColor(0.0f, 1.0f, 1.0f, 1.0f);	// Cyan
+	//ourContext->cgClearColor(1.0f, 0.0f, 1.0f, 1.0f);	// Magenta
+	//ourContext->cgClearColor(1.0f, 1.0f, 1.0f, 1.0f);	// Weiß
+	//ourContext->cgClearColor(0.8f, 0.8f, 0.8f, 1.0f);	// Grau 20%
+
 	ourContext->cgClear(CG_COLOR_BUFFER_BIT);
 
 	// prepare vertex array for point a
@@ -101,8 +117,13 @@ void programStep_SpringenderPunkt()
 	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, &color[0][0]);
 	
 	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
-	// Uebung 01, Aufgabe 3b)
-	ourContext->cgDrawArrays(CG_POINTS, 0, 2);
+
+	///---------------------------------------------------------------------------
+	/// Übung 01 - Aufgabe 3b  |  Wechsel zwischen Ausgabe als Punkte oder als
+	///						   |  Linie
+	///---------------------------------------------------------------------------
+	//ourContext->cgDrawArrays(CG_POINTS, 0, 2);
+	ourContext->cgDrawArrays(CG_LINES, 0, 2);
 }
 
 //---------------------------------------------------------------------------
@@ -118,3 +139,4 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+#endif

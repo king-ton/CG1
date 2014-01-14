@@ -33,35 +33,52 @@ CGFrameBuffer::CGBuffer4UB::~CGBuffer4UB()
 {
 	free(pBufferData);
 }
+
+//---------------------------------------------------------------------------
+// Übung 01 - Aufgabe 1a  |  Speicherbereich reservieren für Color-Buffer
 //---------------------------------------------------------------------------
 bool CGFrameBuffer::CGBuffer4UB::reserve(int width, int height)
 {
 	this->width = width;
 	this->height = height;
 
-	// Uebung 01, Aufgabe 1a)
-	// ...
+	// Speicherbereich für Color-Buffer erzeugen
+	pBufferData = (unsigned char*)malloc(4 * width * height);
 
 	return true;
 }
+
+//---------------------------------------------------------------------------
+// Übung 01 - Aufgabe 1c  |  Gibt einen Wert des Color-Buffers zurück
 //---------------------------------------------------------------------------
 void CGFrameBuffer::CGBuffer4UB::get(int x, int y, float *rgba)
 {
-	// Uebung 01, Aufgabe 1c)
-	// ...
+	// Gibt den Farbwert an der Stelle (x, y) zurück
+	for (int i = 0; i < 4; i++)
+		rgba[i] = pBufferData[4 * (y * width + x) + i] / 255.0F;
 }
+
+//---------------------------------------------------------------------------
+// Übung 01 - Aufgabe 1b  |  Schreiben eines Farbwertes in den Color-Buffer
 //---------------------------------------------------------------------------
 void CGFrameBuffer::CGBuffer4UB::set(int x, int y, const float *rgba)
 {
-	// Uebung 01, Aufgabe 1b)
-	// ...
+	// Schreibt einen Farbwert an die Stelle (x, y)
+	for (int i = 0; i < 4; i++)
+		pBufferData[4 * (y * width + x) + i] = rgba[i] * 255.0F;
 }
+
+//---------------------------------------------------------------------------
+// Übung 01 - Aufgabe 1d  |  Setzt den kompletten Color-Buffer auf gleichen 
+//						  |  Wert 
 //---------------------------------------------------------------------------
 void CGFrameBuffer::CGBuffer4UB::clear(const float *rgba)
 {
-	// Uebung 01, Aufgabe 1d)
-	// ...
+	for (int iY = 0; iY < height; iY++)
+	for (int iX = 0; iX < width; iX++)
+		set(iX, iY, rgba);
 }
+
 //---------------------------------------------------------------------------
 unsigned char* CGFrameBuffer::CGBuffer4UB::getDataPointer()
 {
