@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define UEBUNG1
+#define UEBUNG2
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -12,7 +12,7 @@
 #include "CGContext.h"
 
 //---------------------------------------------------------------------------
-// Übung 1  |  Implementierung Color-Buffer
+// Übung 1  |  Implementierung Frame-Buffer
 //---------------------------------------------------------------------------
 #ifdef UEBUNG1
 //---------------------------------------------------------------------------
@@ -84,11 +84,11 @@ void programStep_SpringenderPunkt()
 	///---------------------------------------------------------------------------
 	/// Übung 01 - Aufgabe 2a  |  Setzen der Hintergrundfarbe
 	///---------------------------------------------------------------------------
-	ourContext->cgClearColor(0.5f, 0.0f, 0.0f, 1.0f);	// Rot
+	//ourContext->cgClearColor(0.5f, 0.0f, 0.0f, 1.0f);	// Rot
 	//ourContext->cgClearColor(1.0f, 1.0f, 0.0f, 1.0f);	// Gelb
 	//ourContext->cgClearColor(0.0f, 1.0f, 1.0f, 1.0f);	// Cyan
 	//ourContext->cgClearColor(1.0f, 0.0f, 1.0f, 1.0f);	// Magenta
-	//ourContext->cgClearColor(1.0f, 1.0f, 1.0f, 1.0f);	// Weiß
+	ourContext->cgClearColor(1.0f, 1.0f, 1.0f, 1.0f);	// Weiß
 	//ourContext->cgClearColor(0.8f, 0.8f, 0.8f, 1.0f);	// Grau 20%
 
 	ourContext->cgClear(CG_COLOR_BUFFER_BIT);
@@ -135,6 +135,81 @@ int main(int argc, char** argv)
 
 	CG1Helper::setProgramStep(programStep_SpringenderPunkt);
 	
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 2  |  Linienrasterisierung nach Bresenham
+//---------------------------------------------------------------------------
+#ifdef UEBUNG2
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  160   // Framebuffer width.
+#define FRAME_HEIGHT 100   // Framebuffer height.
+#define FRAME_SCALE  5     // Integer scaling factors (zoom).
+CGContext *ourContext;
+
+//---------------------------------------------------------------------------
+// generic "passthorugh" vertex program
+void passthroughVertexProgram(const CGVertexAttributes& in,
+	CGVertexVaryings& out,
+	const CGUniformData& uniforms)
+{
+	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
+	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
+	out.varyings[CG_COLOR_VARYING] = in.attributes[CG_COLOR_ATTRIBUTE];
+	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+}
+//---------------------------------------------------------------------------
+// generic "passthorugh" fragment program
+void passthroughFragmentProgram(const CGFragmentData& in,
+	CGVec4& out,
+	const CGUniformData& uniforms)
+{
+	out = in.varyings[CG_COLOR_VARYING];
+}
+
+// Vertex Attribute Arrays.
+#define VERTEX_COUNT 2
+float vertex[VERTEX_COUNT][3];	// x,y,z
+
+//---------------------------------------------------------------------------
+// Übung 02 - Aufgabe 1a  |  programStep erstellt
+// Übung 02 - Aufgabe 1c  |  Bresenham aktiviert
+//---------------------------------------------------------------------------
+void programStep_LineBenchmark()
+{
+	// prepare vertex array for point a
+	vertex[0][0] = 0.0f;
+	vertex[0][1] = 0.0f;
+	vertex[0][2] = 0.0f;
+
+	// prepare vertex array for point b
+	vertex[1][0] = FRAME_WIDTH - 1.0f;
+	vertex[1][1] = FRAME_HEIGHT - 1.0f;
+	vertex[1][2] = 0.0f;
+
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, &vertex[0][0]);
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgEnable(CG_USE_BRESENHAM);
+
+	for (int i = 0; i < 10000; i++) {
+		ourContext->cgDrawArrays(CG_LINES, 0, 2);
+	}
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_LineBenchmark);
+
 	CG1Helper::runApplication();
 
 	return 0;
