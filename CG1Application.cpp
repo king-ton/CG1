@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define UEBUNG3
+#define UEBUNG3_2
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -19,7 +19,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -36,7 +36,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -48,7 +48,7 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 #endif
 
 //---------------------------------------------------------------------------
-// Übung 1  |  Implementierung Frame-Buffer
+// Übung 01  |  Implementierung Frame-Buffer
 //---------------------------------------------------------------------------
 #if defined(UEBUNG1)
 //---------------------------------------------------------------------------
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 #endif
 
 //---------------------------------------------------------------------------
-// Übung 2  |  Linienrasterisierung nach Bresenham
+// Übung 02  |  Linienrasterisierung nach Bresenham
 //---------------------------------------------------------------------------
 #if defined(UEBUNG2)
 //---------------------------------------------------------------------------
@@ -211,9 +211,9 @@ int main(int argc, char** argv)
 #endif
 
 //---------------------------------------------------------------------------
-// Übung 3  |  Lineare Interpolation, Dreiecke (Wireframe)
+// Übung 03 - Aufgabe 1   |  Lineare Interpolation
 //---------------------------------------------------------------------------
-#if defined(UEBUNG3)
+#if defined(UEBUNG3_1)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  41		// Framebuffer width.
@@ -249,7 +249,6 @@ void programStep_TestBresenham()
 	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
 	ourContext->cgDrawArrays(CG_LINES, 0, 32); // 32 vertices for 16 lines.
 }
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 int main(int argc, char** argv)
@@ -265,3 +264,63 @@ int main(int argc, char** argv)
 	return 0;
 }
 #endif
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 2   |  Dreiecke (Wireframe)
+//---------------------------------------------------------------------------
+#if defined(UEBUNG3_2)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  41		// Framebuffer width.
+#define FRAME_HEIGHT 41		// Framebuffer height.
+#define FRAME_SCALE  5		// Integer scaling factors (zoom).
+
+float vertexPosition_TestBresenham[32 * 3] = {
+	20, 30, 0, 20, 40, 0, 24, 29, 0, 28, 38, 0, 27, 27, 0, 34, 34, 0, 29, 24, 0, 38, 28, 0,
+	30, 20, 0, 40, 20, 0, 29, 16, 0, 38, 12, 0, 27, 13, 0, 34, 6, 0, 24, 11, 0, 28, 2, 0,
+	20, 10, 0, 20, 0, 0, 16, 11, 0, 12, 2, 0, 13, 13, 0, 6, 6, 0, 11, 16, 0, 2, 12, 0,
+	10, 20, 0, 0, 20, 0, 11, 24, 0, 2, 28, 0, 13, 27, 0, 6, 34, 0, 16, 29, 0, 12, 38, 0
+};
+float vertexColor_TestBresenham[32 * 4] = {
+	1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1,
+	1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1,
+	1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1,
+	1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1
+};
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 2a  |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_TestTriangle()
+{
+	// clear
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT);
+
+	// set vertex data
+	float vertexPosition_TestTriangle[3 * 3] = { 0, 0, 0, 41 - 1, 0, 0, 41 / 2, 41 - 1, 0 };
+	float vertexColor_TestTriangle[3 * 4] = { 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1 };
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertexPosition_TestTriangle);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, vertexColor_TestTriangle);
+
+	// render wireframe triangle
+	ourContext->cgPolygonMode(CG_LINE);
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 3); // 3 vertices for 1 triangle.
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_TestTriangle);
+
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
+
