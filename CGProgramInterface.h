@@ -70,10 +70,15 @@ struct CGFragmentData
 		for (int i=0; i<CG_VARYING_COUNT; i++)
 			varyings[i].set(vertex.varyings[i]);
 	}
+
+	//---------------------------------------------------------------------------
+	// Übung 03 - Aufgabe 1b  |  Interpolation implementiert
+	//---------------------------------------------------------------------------
 	void set(const CGVertexVaryings& A, const CGVertexVaryings& B, float ratio)
 	{
-		// interpolation
-		// ...
+		for (int i = 0; i < CG_VARYING_COUNT; ++i)
+			for (int j = 0; j < 4; ++j)
+				varyings[i][j] = (1.0F - ratio) * A.varyings[i][j] + ratio * B.varyings[i][j];
 	}
 	void set(const CGVertexVaryings& A, const CGVertexVaryings& B, const CGVertexVaryings& C, float a, float b, float c)
 	{
