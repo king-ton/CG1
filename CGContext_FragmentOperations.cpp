@@ -41,12 +41,21 @@ void CGContext::m_cgFragmentPipeline(CGFragmentData& fragment)
 
 	m_cgFragmentWriteBuffer(fragment);
 }
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 3a  |  Fragmente außerhalb des Framebuffers werden
+//						  |  verworfen
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentClipping(CGFragmentData& fragment)
 {
-	// ...
+	if (fragment.coordinates[X] >= m_frameBuffer.getWidth() || 
+		fragment.coordinates[Y] >= m_frameBuffer.getHeight() || 
+		fragment.coordinates[X] < 0 ||
+		fragment.coordinates[Y] < 0)
+		return false;
 	return true;
 }
+
 //---------------------------------------------------------------------------
 void CGContext::m_cgFragmentProgram(CGFragmentData& fragment)
 {
