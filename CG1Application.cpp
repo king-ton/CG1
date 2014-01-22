@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define UEBUNG3_2
+#define UEBUNG3_3
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -19,7 +19,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -36,7 +36,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -220,13 +220,13 @@ int main(int argc, char** argv)
 #define FRAME_HEIGHT 41		// Framebuffer height.
 #define FRAME_SCALE  5		// Integer scaling factors (zoom).
 
-float vertexPosition_TestBresenham[32 * 3] = {
+float vertexPosition_TestBresenham[32*3] = {
 	20, 30, 0, 20, 40, 0, 24, 29, 0, 28, 38, 0, 27, 27, 0, 34, 34, 0, 29, 24, 0, 38, 28, 0,
 	30, 20, 0, 40, 20, 0, 29, 16, 0, 38, 12, 0, 27, 13, 0, 34, 6, 0, 24, 11, 0, 28, 2, 0,
 	20, 10, 0, 20, 0, 0, 16, 11, 0, 12, 2, 0, 13, 13, 0, 6, 6, 0, 11, 16, 0, 2, 12, 0,
 	10, 20, 0, 0, 20, 0, 11, 24, 0, 2, 28, 0, 13, 27, 0, 6, 34, 0, 16, 29, 0, 12, 38, 0
 };
-float vertexColor_TestBresenham[32 * 4] = {
+float vertexColor_TestBresenham[32*4] = {
 	1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1,
 	1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1,
 	1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1,
@@ -275,21 +275,8 @@ int main(int argc, char** argv)
 #define FRAME_HEIGHT 41		// Framebuffer height.
 #define FRAME_SCALE  5		// Integer scaling factors (zoom).
 
-float vertexPosition_TestBresenham[32 * 3] = {
-	20, 30, 0, 20, 40, 0, 24, 29, 0, 28, 38, 0, 27, 27, 0, 34, 34, 0, 29, 24, 0, 38, 28, 0,
-	30, 20, 0, 40, 20, 0, 29, 16, 0, 38, 12, 0, 27, 13, 0, 34, 6, 0, 24, 11, 0, 28, 2, 0,
-	20, 10, 0, 20, 0, 0, 16, 11, 0, 12, 2, 0, 13, 13, 0, 6, 6, 0, 11, 16, 0, 2, 12, 0,
-	10, 20, 0, 0, 20, 0, 11, 24, 0, 2, 28, 0, 13, 27, 0, 6, 34, 0, 16, 29, 0, 12, 38, 0
-};
-float vertexColor_TestBresenham[32 * 4] = {
-	1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1,
-	1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1,
-	1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1,
-	1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1
-};
-
 //---------------------------------------------------------------------------
-// Übung 03 - Aufgabe 2a  |  programStep erstellt
+// Übung 03 - Aufgabe 2b  |  programStep erstellt
 //---------------------------------------------------------------------------
 void programStep_TestTriangle()
 {
@@ -298,8 +285,8 @@ void programStep_TestTriangle()
 	ourContext->cgClear(CG_COLOR_BUFFER_BIT);
 
 	// set vertex data
-	float vertexPosition_TestTriangle[3 * 3] = { 0, 0, 0, 41 - 1, 0, 0, 41 / 2, 41 - 1, 0 };
-	float vertexColor_TestTriangle[3 * 4] = { 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1 };
+	float vertexPosition_TestTriangle[3*3] = { 0, 0, 0, 41 - 1, 0, 0, 41 / 2, 41 - 1, 0 };
+	float vertexColor_TestTriangle[3*4] = { 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1 };
 	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertexPosition_TestTriangle);
 	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, vertexColor_TestTriangle);
 
@@ -317,6 +304,56 @@ int main(int argc, char** argv)
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
 
 	CG1Helper::setProgramStep(programStep_TestTriangle);
+
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 3   |  Fragment-Clipping
+//---------------------------------------------------------------------------
+#if defined(UEBUNG3_3)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  41		// Framebuffer width.
+#define FRAME_HEIGHT 41		// Framebuffer height.
+#define FRAME_SCALE  5		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 3b  |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_TestRotatingTriangle()
+{
+	// clear
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT);
+
+	// Construct vertex data
+	static float a=0.0; a+=0.01;
+	float ca = cos(a), sa = sin(a);
+	float vertexPosition_TestRotTriangle[3*3]={20,20,0, ca*30+20,sa*30+20,0, -sa*20+20,ca*20+20,0};
+	float vertexColor_TestRotTriangle[3*4] ={1,0,0,1, 0,0,1,1, 0,1,0,1};
+
+	// and set vertex pointers
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE,	vertexPosition_TestRotTriangle);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE,		vertexColor_TestRotTriangle);
+
+	// render
+	ourContext->cgPolygonMode(CG_LINE);
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 3); // 3 vertices for 1 triangle.
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_TestRotatingTriangle);
 
 	CG1Helper::runApplication();
 
