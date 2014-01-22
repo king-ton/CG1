@@ -103,29 +103,55 @@ void CGContext::m_cgRasterizePoint(int pipelineVertexOffset)
 //---------------------------------------------------------------------------
 // Übung 01 - Aufgabe 3a  |  Erzeugen einer Linie zwischen 2 Vertices
 // Übung 02 - Aufgabe 1b  |  Austausch gegen bessere Variante
+// Übung 03 - Aufgabe 2a  |  Refaktorisierung
 //---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeStupidLine(int pipelineVertexOffset)
 {
-	m_cgRasterizeLineBresenham(pipelineVertexOffset);
+	m_cgRasterizeLine(pipelineVertexOffset, pipelineVertexOffset + 1);
 }
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 2a  |  Refaktorisierung
+//---------------------------------------------------------------------------
+void CGContext::m_cgRasterizeLineBresenham(int pipelineVertexOffset)
+{
+	m_cgRasterizeLine(pipelineVertexOffset, pipelineVertexOffset + 1);
+}
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 2a  |  Funktion implementiert
+//---------------------------------------------------------------------------
+void CGContext::m_cgRasterizeWireTriangle(int pipelineVertexOffset)
+{
+	for (int i = 0; i < 3; i++) {
+		m_cgRasterizeLine(pipelineVertexOffset + i, pipelineVertexOffset + (i + 1) % 3);
+	}
+}
+
+//---------------------------------------------------------------------------
+void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
+{
+	// ...
+}
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 // Übung 02 - Aufgabe 1b  |  Aus Vorgabe eingefügt
 // Übung 02 - Aufgabe 2   |  Bresenham implementiert für 0<=m<=1
 // Übung 02 - Aufgabe 3   |  Bresenham erweitert für beliebigen Anstieg
 // Übung 03 - Aufgabe 1c  |  Interpolation hinzugefügt
+// Übung 03 - Aufgabe 2a  |  Refaktorisierung
 //---------------------------------------------------------------------------
-void CGContext::m_cgRasterizeLineBresenham(int pipelineVertexOffset)
+void CGContext::m_cgRasterizeLine(int pipelineVertexOffset1, int pipelineVertexOffset2)
 {
 	// This primitive produces many fragments from 2 vertices:
-	CGVertexVaryings &vertex0 = m_pipelineVertexVaryings[pipelineVertexOffset + 0];
-	CGVertexVaryings &vertex1 = m_pipelineVertexVaryings[pipelineVertexOffset + 1];
+	CGVertexVaryings &vertex0 = m_pipelineVertexVaryings[pipelineVertexOffset1];
+	CGVertexVaryings &vertex1 = m_pipelineVertexVaryings[pipelineVertexOffset2];
 
 	// draw a line from vertex0 to vertex1
 	CGVec2i from, to;
-	from.set((int)vertex0.varyings[CG_POSITION_VARYING][X],
-		(int)vertex0.varyings[CG_POSITION_VARYING][Y]);
-	to.set((int)vertex1.varyings[CG_POSITION_VARYING][X],
-		(int)vertex1.varyings[CG_POSITION_VARYING][Y]);
+	from.set((int)vertex0.varyings[CG_POSITION_VARYING][X], (int)vertex0.varyings[CG_POSITION_VARYING][Y]);
+	to.set((int)vertex1.varyings[CG_POSITION_VARYING][X], (int)vertex1.varyings[CG_POSITION_VARYING][Y]);
 
 	// fragment to work on (initialize from vertex, set coordinates, push).
 	CGFragmentData fragment;
@@ -138,31 +164,18 @@ void CGContext::m_cgRasterizeLineBresenham(int pipelineVertexOffset)
 
 	if (swapxy) {
 		int tmp;
-
-		tmp = to[Y];
-		to[Y] = to[X];
-		to[X] = tmp;
-
-		tmp = from[Y];
-		from[Y] = from[X];
-		from[X] = tmp;
+		tmp = to[Y];	to[Y] = to[X];		to[X] = tmp;
+		tmp = from[Y];	from[Y] = from[X];	from[X] = tmp;
 	}
 
 	// Startpunkt liegt weiter links als Endpunkt?
 	if (from[X] > to[X]) {
 		int tmp;
-		
-		tmp = from[X];
-		from[X] = to[X];
-		to[X] = tmp;
-
-		tmp = from[Y];
-		from[Y] = to[Y];
-		to[Y] = tmp;
+		tmp = from[X]; from[X] = to[X]; to[X] = tmp;
+		tmp = from[Y]; from[Y] = to[Y]; to[Y] = tmp;
 
 		CGVertexVaryings vertexTmp = vertex0;
-		vertex0 = vertex1;
-		vertex1 = vertexTmp;
+		vertex0 = vertex1; vertex1 = vertexTmp;
 	}
 
 	///---------------------------------------------------------------------------
@@ -201,14 +214,3 @@ void CGContext::m_cgRasterizeLineBresenham(int pipelineVertexOffset)
 		++x;
 	}
 }
-//---------------------------------------------------------------------------
-void CGContext::m_cgRasterizeWireTriangle(int pipelineVertexOffset)
-{
-	// ...
-}
-//---------------------------------------------------------------------------
-void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
-{
-	// ...
-}
-//---------------------------------------------------------------------------

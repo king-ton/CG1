@@ -177,6 +177,9 @@ private:
 	/// Triangle rasterizer.
 	void m_cgRasterizeTriangle(int pipelineVertexOffset);
 
+	/// Line rasterizer for custom offsets.
+	void m_cgRasterizeLine(int pipelineVertexOffset1, int pipelineVertexOffset2);
+
 
 	// Pipeline methods (_FragmentOperations.cpp).
 
