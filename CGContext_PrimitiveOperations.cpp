@@ -112,6 +112,7 @@ void CGContext::m_cgRasterizeStupidLine(int pipelineVertexOffset)
 // Übung 02 - Aufgabe 1b  |  Aus Vorgabe eingefügt
 // Übung 02 - Aufgabe 2   |  Bresenham implementiert für 0<=m<=1
 // Übung 02 - Aufgabe 3   |  Bresenham erweitert für beliebigen Anstieg
+// Übung 03 - Aufgabe 1c  |  Interpolation hinzugefügt
 //---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeLineBresenham(int pipelineVertexOffset)
 {
@@ -166,6 +167,7 @@ void CGContext::m_cgRasterizeLineBresenham(int pipelineVertexOffset)
 
 	///---------------------------------------------------------------------------
 	/// Übung 02 - Aufgabe 2   |  Bresenham implementiert für 0<=m<=1
+	/// Übung 03 - Aufgabe 1c  |  Interpolation hinzugefügt
 	///---------------------------------------------------------------------------
 	int x = from[X], y = from[Y];
 	int dx = to[X] - from[X];
