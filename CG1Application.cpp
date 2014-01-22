@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define UEBUNG2
+#define UEBUNG1
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -12,35 +12,59 @@
 #include "CGContext.h"
 
 //---------------------------------------------------------------------------
+// GLOBALE VARIABLEN
+//---------------------------------------------------------------------------
+CGContext *ourContext;
+
+//---------------------------------------------------------------------------
+// VERTEX PROGRAMME
+//---------------------------------------------------------------------------
+#if defined(UEBUNG1) || defined(UEBUNG2)
+//---------------------------------------------------------------------------
+// generic "passthorugh" vertex program
+void passthroughVertexProgram(const CGVertexAttributes& in,
+	CGVertexVaryings& out,
+	const CGUniformData& uniforms)
+{
+	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
+	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
+	out.varyings[CG_COLOR_VARYING] = in.attributes[CG_COLOR_ATTRIBUTE];
+	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+}
+#endif
+
+//---------------------------------------------------------------------------
+// FRAGMENT PROGRAMME
+//---------------------------------------------------------------------------
+#if defined(UEBUNG1) || defined(UEBUNG2)
+//---------------------------------------------------------------------------
+// generic "passthorugh" fragment program
+void passthroughFragmentProgram(const CGFragmentData& in,
+	CGVec4& out,
+	const CGUniformData& uniforms)
+{
+	out = in.varyings[CG_COLOR_VARYING];
+}
+#endif
+
+
+
+
+
+//---------------------------------------------------------------------------
 // Übung 1  |  Implementierung Frame-Buffer
 //---------------------------------------------------------------------------
-#ifdef UEBUNG1
+#if defined(UEBUNG1)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  160   // Framebuffer width.
 #define FRAME_HEIGHT 100   // Framebuffer height.
 #define FRAME_SCALE  5     // Integer scaling factors (zoom).
-CGContext *ourContext;
 
-//---------------------------------------------------------------------------
-// generic "passthorugh" vertex program
-void passthroughVertexProgram(const CGVertexAttributes& in,
-							  CGVertexVaryings& out,
-							  const CGUniformData& uniforms)
-{
-	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
-	out.varyings[CG_NORMAL_VARYING]   = in.attributes[CG_NORMAL_ATTRIBUTE];
-	out.varyings[CG_COLOR_VARYING]    = in.attributes[CG_COLOR_ATTRIBUTE];
-	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
-}
-//---------------------------------------------------------------------------
-// generic "passthorugh" fragment program
-void passthroughFragmentProgram(const CGFragmentData& in,
-								CGVec4& out,
-								const CGUniformData& uniforms)
-{
-	out = in.varyings[CG_COLOR_VARYING];
-}
+// Vertex Attribute Arrays.
+#define VERTEX_COUNT 2
+float vertex[VERTEX_COUNT][3];	// x,y,z
+float color[VERTEX_COUNT][4];	  // r,g,b,a
 
 //---------------------------------------------------------------------------
 // This is something specifically needed for this application.
@@ -53,11 +77,6 @@ typedef struct
 } SpringenderPunkt;
 SpringenderPunkt a={1.0f, 1.0f, 20.0f, 0.0f};
 SpringenderPunkt b={0.5f, -0.75f, 70.0f, 50.0f};
-
-// Vertex Attribute Arrays.
-#define VERTEX_COUNT 2
-float vertex[VERTEX_COUNT][3];	// x,y,z
-float color[VERTEX_COUNT][4];	  // r,g,b,a
 
 //---------------------------------------------------------------------------
 void animateSpringenderPunkt(SpringenderPunkt& p)
@@ -144,33 +163,12 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 // Übung 2  |  Linienrasterisierung nach Bresenham
 //---------------------------------------------------------------------------
-#ifdef UEBUNG2
+#if defined(UEBUNG2)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  160   // Framebuffer width.
 #define FRAME_HEIGHT 100   // Framebuffer height.
 #define FRAME_SCALE  5     // Integer scaling factors (zoom).
-CGContext *ourContext;
-
-//---------------------------------------------------------------------------
-// generic "passthorugh" vertex program
-void passthroughVertexProgram(const CGVertexAttributes& in,
-	CGVertexVaryings& out,
-	const CGUniformData& uniforms)
-{
-	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
-	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
-	out.varyings[CG_COLOR_VARYING] = in.attributes[CG_COLOR_ATTRIBUTE];
-	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
-}
-//---------------------------------------------------------------------------
-// generic "passthorugh" fragment program
-void passthroughFragmentProgram(const CGFragmentData& in,
-	CGVec4& out,
-	const CGUniformData& uniforms)
-{
-	out = in.varyings[CG_COLOR_VARYING];
-}
 
 // Vertex Attribute Arrays.
 #define VERTEX_COUNT 2
