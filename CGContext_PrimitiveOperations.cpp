@@ -145,8 +145,8 @@ void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 void CGContext::m_cgRasterizeLine(int pipelineVertexOffset1, int pipelineVertexOffset2)
 {
 	// This primitive produces many fragments from 2 vertices:
-	CGVertexVaryings &vertex0 = m_pipelineVertexVaryings[pipelineVertexOffset1];
-	CGVertexVaryings &vertex1 = m_pipelineVertexVaryings[pipelineVertexOffset2];
+	CGVertexVaryings vertex0 = m_pipelineVertexVaryings[pipelineVertexOffset1];
+	CGVertexVaryings vertex1 = m_pipelineVertexVaryings[pipelineVertexOffset2];
 
 	// draw a line from vertex0 to vertex1
 	CGVec2i from, to;
