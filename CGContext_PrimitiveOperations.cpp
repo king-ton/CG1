@@ -129,9 +129,44 @@ void CGContext::m_cgRasterizeWireTriangle(int pipelineVertexOffset)
 }
 
 //---------------------------------------------------------------------------
+// Übung 04 - Aufgabe 1a  |  Funktion implementiert
+//---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 {
-	// ...
+	CGVertexVaryings *vertex = m_pipelineVertexVaryings + pipelineVertexOffset;
+	CGVertexVaryings &A = vertex[0], &B = vertex[1], &C = vertex[2];
+
+	CGVec4 &vertex0 = A.varyings[CG_POSITION_VARYING];
+	CGVec4 &vertex1 = B.varyings[CG_POSITION_VARYING];
+	CGVec4 &vertex2 = C.varyings[CG_POSITION_VARYING];
+
+	CGFragmentData fragment;
+	fragment.set(A);
+
+	float det = (vertex1[X] - vertex0[X]) * (vertex2[Y] - vertex0[Y]) -
+				(vertex1[Y] - vertex0[Y]) * (vertex2[X] - vertex0[X]);
+
+
+	for (int iY = 0; iY < m_frameBuffer.getHeight(); iY++)
+	for (int iX = 0; iX < m_frameBuffer.getWidth(); iX++) {
+		float x = iX + 0.5F, y = iY + 0.5F;
+
+		float x0 = vertex0[X] - x;
+		float y0 = vertex0[Y] - y;
+		float x1 = vertex1[X] - x;
+		float y1 = vertex1[Y] - y;
+		float x2 = vertex2[X] - x;
+		float y2 = vertex2[Y] - y;
+
+		float a = (x1 * y2) - (x2 * y1);
+		float b = (x2 * y0) - (x0 * y2);
+		float c = (x0 * y1) - (x1 * y0);
+
+		if (a >= 0 & b >= 0 & c >= 0) {
+			fragment.coordinates.set(iX, iY);
+			m_cgPushFragment(fragment);
+		}
+	}
 }
 //---------------------------------------------------------------------------
 
