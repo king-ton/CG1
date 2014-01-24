@@ -130,6 +130,7 @@ void CGContext::m_cgRasterizeWireTriangle(int pipelineVertexOffset)
 
 //---------------------------------------------------------------------------
 // Übung 04 - Aufgabe 1a  |  Funktion implementiert
+// Übung 04 - Aufgabe 2b  |  Interpolation hinzugefügt
 //---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 {
@@ -141,7 +142,6 @@ void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 	CGVec4 &vertex2 = C.varyings[CG_POSITION_VARYING];
 
 	CGFragmentData fragment;
-	fragment.set(A);
 
 	float det = (vertex1[X] - vertex0[X]) * (vertex2[Y] - vertex0[Y]) -
 				(vertex1[Y] - vertex0[Y]) * (vertex2[X] - vertex0[X]);
@@ -164,11 +164,11 @@ void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 
 		if (a >= 0 & b >= 0 & c >= 0) {
 			fragment.coordinates.set(iX, iY);
+			fragment.set(A, B, C, a / det, b / det, c / det);
 			m_cgPushFragment(fragment);
 		}
 	}
 }
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 // Übung 02 - Aufgabe 1b  |  Aus Vorgabe eingefügt
