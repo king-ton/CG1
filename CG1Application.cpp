@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define UEBUNG3_3
+#define UEBUNG4
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -19,7 +19,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -36,7 +36,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -314,7 +314,7 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 // Übung 03 - Aufgabe 3   |  Fragment-Clipping
 //---------------------------------------------------------------------------
-#if defined(UEBUNG3_3)
+#if defined(UEBUNG3_3) || defined(UEBUNG4)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  41		// Framebuffer width.
@@ -323,6 +323,7 @@ int main(int argc, char** argv)
 
 //---------------------------------------------------------------------------
 // Übung 03 - Aufgabe 3b  |  programStep erstellt
+// Übung 04 - Aufgabe 1b  | gefülltes Dreieck erzeugen
 //---------------------------------------------------------------------------
 void programStep_TestRotatingTriangle()
 {
@@ -340,8 +341,13 @@ void programStep_TestRotatingTriangle()
 	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE,	vertexPosition_TestRotTriangle);
 	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE,		vertexColor_TestRotTriangle);
 
+	///---------------------------------------------------------------------------
+	/// Übung 04 - Aufgabe 1b  |  gefülltes Dreieck erzeugen
+	///---------------------------------------------------------------------------
 	// render
-	ourContext->cgPolygonMode(CG_LINE);
+	// ourContext->cgPolygonMode(CG_LINE);
+	ourContext->cgPolygonMode(CG_FILL);
+
 	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
 	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 3); // 3 vertices for 1 triangle.
 }
