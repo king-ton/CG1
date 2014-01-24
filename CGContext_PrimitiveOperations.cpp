@@ -131,6 +131,7 @@ void CGContext::m_cgRasterizeWireTriangle(int pipelineVertexOffset)
 //---------------------------------------------------------------------------
 // Übung 04 - Aufgabe 1a  |  Funktion implementiert
 // Übung 04 - Aufgabe 2b  |  Interpolation hinzugefügt
+// Übung 04 - Aufgabe 3   |  Optimierung
 //---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 {
@@ -146,9 +147,24 @@ void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 	float det = (vertex1[X] - vertex0[X]) * (vertex2[Y] - vertex0[Y]) -
 				(vertex1[Y] - vertex0[Y]) * (vertex2[X] - vertex0[X]);
 
+	int minX = m_frameBuffer.getWidth(),
+		minY = m_frameBuffer.getHeight(),
+		maxX = -1,
+		maxY = -1;
 
-	for (int iY = 0; iY < m_frameBuffer.getHeight(); iY++)
-	for (int iX = 0; iX < m_frameBuffer.getWidth(); iX++) {
+	for (int i = 0; i < 3; ++i) {
+		int x = vertex[i].varyings[CG_POSITION_VARYING][X],
+			y = vertex[i].varyings[CG_POSITION_VARYING][Y];
+
+		if (x < minX) minX = x;
+		if (x > maxX) maxX = x;
+		if (y < minY) minY = y;
+		if (y > maxY) maxY = y;
+	}
+
+
+	for (int iY = minY; iY <= maxY; iY++)
+	for (int iX = minX; iX <= maxX; iX++) {
 		float x = iX + 0.5F, y = iY + 0.5F;
 
 		float x0 = vertex0[X] - x;
