@@ -467,7 +467,6 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 // Übung 06  |  Transparenz
 //---------------------------------------------------------------------------
-
 #if defined(U6)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
@@ -477,6 +476,7 @@ int main(int argc, char** argv)
 
 //---------------------------------------------------------------------------
 // Übung 06 - Aufgabe 1a  |  programStep erstellt
+// Übung 06 - Aufgabe 3b  |  Sortierung der Dreiecke nach Z-Wert
 //---------------------------------------------------------------------------
 void programStep_TestBlendingZSort()
 {
@@ -506,10 +506,19 @@ void programStep_TestBlendingZSort()
 	// [0,2,1] would mean to render the first, third and then second triangle.
 	int indexArray[N];
 	for (int i = 0; i<N; i++) indexArray[i] = i; // initialize with identity [0,1,2...]
-	// *** Insert your code for sorting the index array here *** //
-	// *** Sort by the z - component of the first corner of the *** //
-	// *** i - th triangle(e.g. float zi = vertices[3*3*i + Z]). *** //
-	// ...
+
+	bool ready;
+	do {
+		ready = true;
+		for (int i = 1; i < N; ++i) {
+			if (vertices[3 * 3 * indexArray[i] + Z] > vertices[3 * 3 * (indexArray[i - 1]) + Z]) {
+				int temp = indexArray[i];
+				indexArray[i] = indexArray[i - 1];
+				indexArray[i - 1] = temp;
+				ready = false;
+			}
+		}
+	} while (!ready);
 
 	ourContext->cgClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
