@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define UEBUNG4
+#define UEBUNG5
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -19,7 +19,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4) || defined(UEBUNG5)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -36,7 +36,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4)
+#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4) || defined(UEBUNG5)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -313,6 +313,7 @@ int main(int argc, char** argv)
 
 //---------------------------------------------------------------------------
 // Übung 03 - Aufgabe 3   |  Fragment-Clipping
+// Übung 04				  |  Dreiecksrasterisierung
 //---------------------------------------------------------------------------
 #if defined(UEBUNG3_3) || defined(UEBUNG4)
 //---------------------------------------------------------------------------
@@ -323,7 +324,7 @@ int main(int argc, char** argv)
 
 //---------------------------------------------------------------------------
 // Übung 03 - Aufgabe 3b  |  programStep erstellt
-// Übung 04 - Aufgabe 1b  | gefülltes Dreieck erzeugen
+// Übung 04 - Aufgabe 1b  |  gefülltes Dreieck erzeugen
 //---------------------------------------------------------------------------
 void programStep_TestRotatingTriangle()
 {
@@ -360,6 +361,92 @@ int main(int argc, char** argv)
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
 
 	CG1Helper::setProgramStep(programStep_TestRotatingTriangle);
+
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 05  |  Backface Culling, Z-Buffer
+//---------------------------------------------------------------------------
+#if defined(UEBUNG5)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  500	// Framebuffer width.
+#define FRAME_HEIGHT 300	// Framebuffer height.
+#define FRAME_SCALE  5		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 1a  |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_TestBFCandZTest()
+{
+	// clear
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT/*|CG_DEPTH_BUFFER_BIT*/);
+
+	static float a = 0.0; a += 0.01;
+	float ca = cos(a), sa = sin(a);
+	float PTS[24] = {	-ca - sa*1.28, -0.6, sa - ca*1.28, ca - sa*1.28, -0.6, -sa - ca*1.28, ca - sa*0.6, 1.28, -sa - ca*0.6,
+						-ca - sa*0.6, 1.28, sa - ca*0.6, -ca + sa*0.6, -1.28, sa + ca*0.6, ca + sa*0.6, -1.28, -sa + ca*0.6,
+						 ca + sa*1.28, 0.6, -sa + ca*1.28, -ca + sa*1.28, 0.6, sa + ca*1.28 };
+#define R3 1,0,0,1, 1,0,0,1, 1,0,0,1
+#define G3 0,1,0,1, 0,1,0,1, 0,1,0,1
+#define B3 0,0,1,1, 0,0,1,1, 0,0,1,1
+#define C3 0,1,1,1, 0,1,1,1, 0,1,1,1
+#define M3 1,0,1,1, 1,0,1,1, 1,0,1,1
+#define Y3 1,1,0,1, 1,1,0,1, 1,1,0,1
+#define P(i) PTS[3*i+0]*60+100,PTS[3*i+1]*50+200,PTS[3*i+2]*0.1
+
+	// construct vertex data
+	float vertices4triangles[54 * 3] = {
+		//clipped triangles
+		0, 0, -1.1, 50, 0, -1.1, 0, 50, -1.1,
+		50, 0, +1.1, 50, 50, +1.1, 0, 50, +1.1,
+
+		//visible triangles
+		//green tri
+		300, 0, -0.5, 480, 0, -0.5, 300, 100, -0.5,
+		//red tri
+		300, 0, -0.5, 480, 100, -0.5, 480, 0, -0.5,
+		//blue tri
+		250, 180, 0.5, 500, 240, -0.5, 250, 240, 0.5,
+		//yellow tri
+		300, 280, 0, 350, 150, 0, 400, 260, 0,
+
+		//rotating cube
+		P(0), P(1), P(2), P(0), P(2), P(3), P(1), P(5), P(6), P(1), P(6), P(2), P(3), P(2), P(6), P(3), P(6), P(7),
+		P(0), P(5), P(1), P(0), P(4), P(5), P(0), P(3), P(7), P(0), P(7), P(4), P(4), P(7), P(6), P(4), P(6), P(5) };
+	float colors4triangles[54 * 4] = { B3, B3, G3, R3, C3, Y3, G3, G3, R3, R3, B3, B3, Y3, Y3, C3, C3, M3, M3
+	};
+#undef P
+#undef R3
+#undef B3
+#undef B3
+#undef C3
+#undef M3
+#undef Y3
+
+	//set Attrib Pointers
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4triangles);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4triangles);
+
+	//set Shaders and draw
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 54);
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_TestBFCandZTest);
 
 	CG1Helper::runApplication();
 
