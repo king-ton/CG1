@@ -107,43 +107,57 @@ CGFrameBuffer::CGBuffer1f::~CGBuffer1f()
 	free(pBufferData);
 }
 //---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3b  |  Methode implementiert
+//---------------------------------------------------------------------------
 bool CGFrameBuffer::CGBuffer1f::reserve(int width, int height)
 {
-	// ...
+	this->width = width;
+	this->height = height;
+
+	pBufferData = (float*)malloc(width*height*sizeof(float));
 	return true;
 }
 //---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3b  |  Methode implementiert
+//---------------------------------------------------------------------------
 float CGFrameBuffer::CGBuffer1f::get(int x, int y)
 {
-	// ...
-	return 0.0f;
+	return pBufferData[(y*width + x)];
 }
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3b  |  Methode implementiert
 //---------------------------------------------------------------------------
 void CGFrameBuffer::CGBuffer1f::set(int x, int y, const float z)
 {
-	// ...
+	pBufferData[(y*width + x)] = z;
 }
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3b  |  Methode implementiert
 //---------------------------------------------------------------------------
 void CGFrameBuffer::CGBuffer1f::clear()
 {
-	// ...
+	for (int i = 0; i < height; i++)
+	for (int j = 0; j < width; j++)
+		set(j, i, 2);
 }
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3b  |  Methode implementiert
 //---------------------------------------------------------------------------
 float* CGFrameBuffer::CGBuffer1f::getDataPointer()
 {
-	// ...
-	return NULL;
+	return pBufferData;
 }
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3b  |  Methode implementiert
 //---------------------------------------------------------------------------
 int CGFrameBuffer::CGBuffer1f::getWidth()
 {
-	// ...
-	return 0;
+	return width;
 }
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3b  |  Methode implementiert
 //---------------------------------------------------------------------------
 int CGFrameBuffer::CGBuffer1f::getHeight()
 {
-	// ...
-	return 0;
+	return height;
 }
-//---------------------------------------------------------------------------
