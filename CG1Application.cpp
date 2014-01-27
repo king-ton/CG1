@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define UEBUNG5
+#define U6
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -19,7 +19,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4) || defined(UEBUNG5)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(UG4) || defined(U5) || defined(U6)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -36,7 +36,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1) || defined(UEBUNG2) || defined(UEBUNG3_1) || defined(UEBUNG3_2) || defined(UEBUNG3_3) || defined(UEBUNG4) || defined(UEBUNG5)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -50,7 +50,7 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 //---------------------------------------------------------------------------
 // Übung 01  |  Implementierung Frame-Buffer
 //---------------------------------------------------------------------------
-#if defined(UEBUNG1)
+#if defined(U1)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  160   // Framebuffer width.
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 // Übung 02  |  Linienrasterisierung nach Bresenham
 //---------------------------------------------------------------------------
-#if defined(UEBUNG2)
+#if defined(U2)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  160   // Framebuffer width.
@@ -213,7 +213,7 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 // Übung 03 - Aufgabe 1   |  Lineare Interpolation
 //---------------------------------------------------------------------------
-#if defined(UEBUNG3_1)
+#if defined(U3_1)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  41		// Framebuffer width.
@@ -268,7 +268,7 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 // Übung 03 - Aufgabe 2   |  Dreiecke (Wireframe)
 //---------------------------------------------------------------------------
-#if defined(UEBUNG3_2)
+#if defined(U3_2)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  41		// Framebuffer width.
@@ -315,7 +315,7 @@ int main(int argc, char** argv)
 // Übung 03 - Aufgabe 3   |  Fragment-Clipping
 // Übung 04				  |  Dreiecksrasterisierung
 //---------------------------------------------------------------------------
-#if defined(UEBUNG3_3) || defined(UEBUNG4)
+#if defined(U3_3) || defined(U4)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  41		// Framebuffer width.
@@ -371,7 +371,7 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 // Übung 05  |  Backface Culling, Z-Buffer
 //---------------------------------------------------------------------------
-#if defined(UEBUNG5)
+#if defined(U5)
 //---------------------------------------------------------------------------
 // Übung 05 - Aufgabe 1a  |  Frame-Buffer-Größe angepasst
 //---------------------------------------------------------------------------
@@ -448,7 +448,6 @@ void programStep_TestBFCandZTest()
 	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
 	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 54);
 }
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 int main(int argc, char** argv)
@@ -458,6 +457,83 @@ int main(int argc, char** argv)
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
 
 	CG1Helper::setProgramStep(programStep_TestBFCandZTest);
+
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 05  |  Backface Culling, Z-Buffer
+//---------------------------------------------------------------------------
+
+#if defined(U6)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  500	// Framebuffer width.
+#define FRAME_HEIGHT 300	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Übung 06 - Aufgabe 1a  |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_TestBlendingZSort()
+{
+	static bool anim_blend = false, anim_circle = true;
+	if (CG1Helper::isKeyReleased('b')) anim_blend = !anim_blend;
+	if (CG1Helper::isKeyReleased('c')) anim_circle = !anim_circle;
+
+	const int N = 20; // We define a set of N triangles for a resolution of 500x300
+	static float b = asin(0.4), c = 0.0; b += (anim_blend) ? 0.01 : 0.0; c += (anim_circle) ? 0.01 : 0.0;
+	float vertices[N*3*3], colors[N*3*4]; // again, don’t do this locally as we do!
+
+	for (int i = 0; i<N; i++) {
+		float rgba[4] = { (i + 1) & 0x01 ? 1 : 0, (i + 1) & 0x02 ? 1 : 0, (i + 2) & 0x04 ? 1 : 0, sin(b)*0.5 + 0.5 };
+		float pos[3] = { i*10, i*10, -i*0.01 };
+		if (i >= 10) { // all triangles >= 10 will be rotating ones.
+			float a2 = c + float(i - 10) / float(N - 10)*6.283;
+			pos[X] = 300 + sin(a2)*100.0; pos[Y] = 100 - cos(a2)*50.0; pos[Z] = cos(a2)*0.9;
+		}
+		for (int j = 0; j<3; j++) memcpy(colors + 12*i + 4*j, rgba, sizeof(float)*4);
+		for (int j = 0; j<3; j++) memcpy(vertices + 9*i + 3*j, pos, sizeof(float)*3);
+		vertices[9*i + 6 + X] += 25.0;
+		vertices[9*i + 3 + X] += 50.0;
+		vertices[9*i + 6 + Y] += 75.0;
+	}
+
+	// The index array describes the order of the triangles.
+	// [0,2,1] would mean to render the first, third and then second triangle.
+	int indexArray[N];
+	for (int i = 0; i<N; i++) indexArray[i] = i; // initialize with identity [0,1,2...]
+	// *** Insert your code for sorting the index array here *** //
+	// *** Sort by the z - component of the first corner of the *** //
+	// *** i - th triangle(e.g. float zi = vertices[3*3*i + Z]). *** //
+	// ...
+
+	ourContext->cgClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgEnable(CG_CULL_FACE);
+	ourContext->cgEnable(CG_BLEND);
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors);
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	// We use the index array by passing the correct vertex offset for each triangle.
+	for (int i = 0; i<N; i++)
+		ourContext->cgDrawArrays(CG_TRIANGLES, 3
+		*
+		indexArray[i], 3);
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_TestBlendingZSort);
 
 	CG1Helper::runApplication();
 
