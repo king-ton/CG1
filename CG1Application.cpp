@@ -373,13 +373,16 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------
 #if defined(UEBUNG5)
 //---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 1a  |  Frame-Buffer-Größe angepasst
+//---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  500	// Framebuffer width.
 #define FRAME_HEIGHT 300	// Framebuffer height.
 #define FRAME_SCALE  5		// Integer scaling factors (zoom).
 
 //---------------------------------------------------------------------------
-// Übung 05 - Aufgabe 1a  |  programStep erstellt
+// Übung 05 - Aufgabe 1b  |  programStep erstellt
+// Übung 05 - Aufgabe 2a  |  Depth - Test aktiviert, nur Linien zeichnen
 //---------------------------------------------------------------------------
 void programStep_TestBFCandZTest()
 {
@@ -428,6 +431,12 @@ void programStep_TestBFCandZTest()
 #undef C3
 #undef M3
 #undef Y3
+
+	///---------------------------------------------------------------------------
+	/// Übung 05 - Aufgabe 2a  |  Depth-Test aktiviert, nur Linien zeichnen
+	///---------------------------------------------------------------------------
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgPolygonMode(CG_LINE);
 
 	//set Attrib Pointers
 	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4triangles);
