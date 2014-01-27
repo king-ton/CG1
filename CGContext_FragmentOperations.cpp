@@ -80,10 +80,19 @@ bool CGContext::m_cgFragmentZTest(CGFragmentData& fragment)
 	else
 		return false;
 }
+
+//---------------------------------------------------------------------------
+// Übung 06 - Aufgabe 2a  |  Methode implementiert
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentBlending(CGFragmentData& fragment)
 {
-	// ...
+	float rgba[4];
+	m_frameBuffer.colorBuffer.get(fragment.coordinates[X], fragment.coordinates[Y], rgba);
+
+	float* color = fragment.varyings[CG_COLOR_VARYING].elements;
+	for (int i = 0; i < 3; ++i)
+		color[i] = color[i] * color[3] + rgba[i] * (1 - color[3]);
+
 	return true;
 }
 
