@@ -154,6 +154,7 @@ void CGContext::m_cgRasterizeWireTriangle(int pipelineVertexOffset)
 // Übung 04 - Aufgabe 2b  |  Interpolation hinzugefügt
 // Übung 04 - Aufgabe 3   |  Optimierung
 // Übung 05 - Aufgabe 2b  |  Rückseiten von Primitiven werden nicht gezeichnet
+// Übung 05 - Aufgabe 2c  |  Optimierung Backface-Culling
 //---------------------------------------------------------------------------
 void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 {
@@ -164,11 +165,11 @@ void CGContext::m_cgRasterizeTriangle(int pipelineVertexOffset)
 	CGVec4 &vertex1 = B.varyings[CG_POSITION_VARYING];
 	CGVec4 &vertex2 = C.varyings[CG_POSITION_VARYING];
 
-	if (m_cgBFCullTriangle(vertex0, vertex1, vertex2) == false) {
-		CGFragmentData fragment;
+	float det = (vertex1[X] - vertex0[X]) * (vertex2[Y] - vertex0[Y]) -
+				(vertex1[Y] - vertex0[Y]) * (vertex2[X] - vertex0[X]);
 
-		float det = (vertex1[X] - vertex0[X]) * (vertex2[Y] - vertex0[Y]) -
-			(vertex1[Y] - vertex0[Y]) * (vertex2[X] - vertex0[X]);
+	if (det >= 0) {
+		CGFragmentData fragment;
 
 		int minX = m_frameBuffer.getWidth(),
 			minY = m_frameBuffer.getHeight(),
