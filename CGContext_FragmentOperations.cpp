@@ -68,12 +68,17 @@ void CGContext::m_cgFragmentProgram(CGFragmentData& fragment)
 	m_fragmentProgram(fragment, color, m_uniforms);
 	fragment.varyings[CG_COLOR_VARYING] = color;
 }
+
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3d  |  Prüfen, ob Pixel dahinter liegt
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentZTest(CGFragmentData& fragment)
 {
-	//returns true if the fragment is visible
-	// ...
-	return true;
+	static const float depthTolerance = 1e-6f;
+	if (m_frameBuffer.depthBuffer.get(fragment.coordinates[X], fragment.coordinates[Y]) + depthTolerance > fragment.varyings[CG_POSITION_VARYING][Z])
+		return true;
+	else
+		return false;
 }
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentBlending(CGFragmentData& fragment)
@@ -81,6 +86,9 @@ bool CGContext::m_cgFragmentBlending(CGFragmentData& fragment)
 	// ...
 	return true;
 }
+
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3d  |  Tiefe setzen, falls Fragment davor
 //---------------------------------------------------------------------------
 void CGContext::m_cgFragmentWriteBuffer(CGFragmentData& fragment)
 {
@@ -89,7 +97,11 @@ void CGContext::m_cgFragmentWriteBuffer(CGFragmentData& fragment)
 	m_frameBuffer.colorBuffer.set(fragment.coordinates[X],
 								  fragment.coordinates[Y],
 								  fragment.varyings[CG_COLOR_VARYING].elements);
-	// window space z coordinate into depth buffer
-	// ...
+
+	// Schreibe Tiefe in Tiefen-Buffer
+	if (m_cgFragmentZTest(fragment))
+		m_frameBuffer.depthBuffer.set(	fragment.coordinates[X],
+										fragment.coordinates[Y],
+										fragment.varyings[CG_POSITION_VARYING][Z]);
 }
 //---------------------------------------------------------------------------
