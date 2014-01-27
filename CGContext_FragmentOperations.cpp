@@ -45,13 +45,17 @@ void CGContext::m_cgFragmentPipeline(CGFragmentData& fragment)
 //---------------------------------------------------------------------------
 // Übung 03 - Aufgabe 3a  |  Fragmente außerhalb des Framebuffers werden
 //						  |  verworfen
+// Übung 05 - Aufgabe 3a  |  Fragmente außerhalb des Z-Bereichs werden
+//						  |  verworfen
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentClipping(CGFragmentData& fragment)
 {
 	if (fragment.coordinates[X] >= m_frameBuffer.getWidth() || 
 		fragment.coordinates[Y] >= m_frameBuffer.getHeight() || 
 		fragment.coordinates[X] < 0 ||
-		fragment.coordinates[Y] < 0)
+		fragment.coordinates[Y] < 0 ||
+		fragment.varyings[CG_POSITION_VARYING][Z] < -1 ||
+		fragment.varyings[CG_POSITION_VARYING][Z] > 1)
 		return false;
 	return true;
 }
