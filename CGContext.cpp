@@ -83,12 +83,14 @@ void CGContext::cgClearColor(float red, float green, float blue, float alpha)
 {
 	m_clearColor.set(red, green, blue, alpha);
 }
+
+//---------------------------------------------------------------------------
+// Übung 05 - Aufgabe 3c  |  Tiefen-Buffer löschen
 //---------------------------------------------------------------------------
 void CGContext::cgClear(int bitfield)
 {
 	if (bitfield&CG_COLOR_BUFFER_BIT) m_frameBuffer.colorBuffer.clear(m_clearColor.elements);
-	// clear the depth buffer
-	// ...
+	if (bitfield&CG_DEPTH_BUFFER_BIT) m_frameBuffer.depthBuffer.clear();
 }
 //---------------------------------------------------------------------------
 void CGContext::cgVertexAttribPointer(CGenum attribute,

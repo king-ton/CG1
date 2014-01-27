@@ -5,11 +5,13 @@
 //---------------------------------------------------------------------------
 // CGFRAMEBUFFER
 //---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+// Übung 5 - Aufgabe 3c  |  Reservieren von Tiefen-Buffer hinzugefügt
+//---------------------------------------------------------------------------
 bool CGFrameBuffer::allocate(int width, int height)
 {
-	return (colorBuffer.reserve(width,height));
-	// also reserve a depth buffer
-	// ...
+	return (colorBuffer.reserve(width,height) && depthBuffer.reserve(width, height));
 }
 //---------------------------------------------------------------------------
 int CGFrameBuffer::getWidth()
