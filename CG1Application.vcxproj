@@ -96,6 +96,7 @@
     <ClInclude Include="CG1Helper.h" />
     <ClInclude Include="CGContext.h" />
     <ClInclude Include="CGFrameBuffer.h" />
+    <ClInclude Include="CGImageFile.h" />
     <ClInclude Include="CGMatrix.h" />
     <ClInclude Include="CGPrimClipper.h" />
     <ClInclude Include="CGProgramInterface.h" />
@@ -109,6 +110,7 @@
     <ClCompile Include="CGContext_PrimitiveOperations.cpp" />
     <ClCompile Include="CGContext_VertexOperations.cpp" />
     <ClCompile Include="CGFrameBuffer.cpp" />
+    <ClCompile Include="CGImageFile.cpp" />
     <ClCompile Include="CGMatrix.cpp" />
     <ClCompile Include="CGPrimClipper.cpp" />
     <ClCompile Include="CGTexture.cpp" />
