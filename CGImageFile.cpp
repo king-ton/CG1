@@ -57,10 +57,24 @@ static int read_u16le(cg_u16_t *value, FILE *f)
 // CG1
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+// Hausaufgabe 1 - Aufgabe 2b  |  Funktion implementiert
+//---------------------------------------------------------------------------
 extern int cgImageWriteCG1(const char *filename, const unsigned char *data, int width, int height)
 {
-	// ...
+	FILE *file = fopen(filename, "wb");
 
-	return -1;
+	write_u8(0x43, file); write_u8(0x47, file); write_u8(0x31, file); write_u8(0x69, file);
+	write_u16le(width, file); write_u16le(height, file);
+	write_u8(4, file); write_u8(1, file);
+
+	for (int i = 0; i < 4; ++i)
+	for (int y = height - 1; y >= 0; --y)
+	for (int x = 0; x < width; ++x)
+		write_u8(data[4 * (x + y*width) + i], file);
+
+	fclose(file);
+
+	return 0;
 }
 
