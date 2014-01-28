@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <direct.h>
+#include <string>
 
 //---------------------------------------------------------------------------
 // GENERIC INPUT/OUTPUT HELPERS
@@ -59,10 +61,13 @@ static int read_u16le(cg_u16_t *value, FILE *f)
 
 //---------------------------------------------------------------------------
 // Hausaufgabe 1 - Aufgabe 2b  |  Funktion implementiert
+// Hausaufgebe 1 - Aufgabe 2c  |  Bild in Ordner schreiben
 //---------------------------------------------------------------------------
 extern int cgImageWriteCG1(const char *filename, const unsigned char *data, int width, int height)
 {
-	FILE *file = fopen(filename, "wb");
+	mkdir("Screenshots");
+	
+	FILE *file = fopen(("Screenshots\\" + std::string(filename)).c_str(), "wb");
 
 	write_u8(0x43, file); write_u8(0x47, file); write_u8(0x31, file); write_u8(0x69, file);
 	write_u16le(width, file); write_u16le(height, file);

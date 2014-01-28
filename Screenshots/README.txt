@@ -1,0 +1,1 @@
+Um ein CG1-File zu einem TGA-File zu konvertieren, einfach auf CG1Converter.exe ziehen.

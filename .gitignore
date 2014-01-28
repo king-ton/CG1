@@ -21,3 +21,5 @@ screenshot.*
 *.xml
 .thumbnails
 freeglut.dll
+Screenshot/*.cg1
+Screenshot/*.tga

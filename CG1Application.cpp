@@ -7,9 +7,13 @@
 #include <math.h>
 #include <time.h>           // for time() in srand()
 
+//---------------------------------------------------------------------------
+// Hausaufgabe 1 - Aufgabe 2c  |  CGImageFile hinzugefügt
+//---------------------------------------------------------------------------
 // Our includes.
 #include "CG1Helper.h"
 #include "CGContext.h"
+#include "CGImageFile.h"
 
 //---------------------------------------------------------------------------
 // GLOBALE VARIABLEN
@@ -72,6 +76,8 @@ void makeScreenshot()
 	unsigned char* ssBuffer = (unsigned char*)malloc(4 * FRAME_WIDTH * FRAME_HEIGHT);
 	ourContext->cgReadPixels(ssBuffer);
 
+	cgImageWriteCG1("Screenshot.cg1", ssBuffer, FRAME_WIDTH, FRAME_HEIGHT);
+
 	free(ssBuffer);
 }
 #endif
@@ -83,6 +89,8 @@ void makeScreenshot()
 //---------------------------------------------------------------------------
 void programStep_DrawMatNr()
 {
+	if (CG1Helper::isKeyReleased('s')) makeScreenshot();
+
 	if (pos[0] == NULL) {
 		int matNr = MATNR;
 
@@ -177,8 +185,6 @@ void programStep_DrawMatNr()
 		// render
 		ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
 		ourContext->cgDrawArrays(CG_LINES, 0, 6 * 7 * 2);
-
-		if (CG1Helper::isKeyReleased('s')) makeScreenshot();
 	}
 }
 
