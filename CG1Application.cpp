@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U6
+#define U6_4
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -19,7 +19,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(UG4) || defined(U5) || defined(U6)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -36,7 +36,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -550,3 +550,77 @@ int main(int argc, char** argv)
 }
 #endif
 
+//---------------------------------------------------------------------------
+// Übung 06 - Aufgabe 4  |  Awesome Triangle
+//---------------------------------------------------------------------------
+#if defined(U6_4)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  500	// Framebuffer width.
+#define FRAME_HEIGHT 300	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Übung 06 - Aufgabe 4   |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_AwesomeTriangle()
+{
+	const int N = 20;
+	static float a = 0.0; a += 0.01;
+	if (a >= 0.5) a = 0.0;
+	float vertices[3*3*N], colors[3*4*N]; // again, don’t do this locally as we do!
+	vertices[3*0 + X] = 0; vertices[3*0 + Y] = 0; vertices[3*0 + Z] = 0;
+	colors[4*0 + R] = 1.0f; colors[4*0 + G] = 0; colors[4*0 + B] = 0; colors[4*0 + A] = 0.2f;
+	vertices[3*1 + X] = 500; vertices[3*1 + Y] = 0; vertices[3*1 + Z] = 0;
+	colors[4*1 + R] = 0.0f; colors[4*1 + G] = 1.0f; colors[4*1 + B] = 0; colors[4*1 + A] = 0.2f;
+	vertices[3*2 + X] = 250; vertices[3*2 + Y] = 433; vertices[3*2 + Z] = 0;
+	colors[4*2 + R] = 0.0f; colors[4*2 + G] = 0; colors[4*2 + B] = 1.0f; colors[4*2 + A] = 0.2f;
+	
+	float tempVertices[3*3];
+	float tempColors[3*4];
+
+	for (int i = 0; i < 19; i++) {
+		memcpy(tempColors, &colors[3*4*i], 3*4*sizeof(float));
+		
+		tempVertices[3*0 + X] = a*vertices[3*3*i + 3*1 + X] + (1 - a)*vertices[3*3*i + 3*0 + X];
+		tempVertices[3*0 + Y] = a*vertices[3*3*i + 3*1 + Y] + (1 - a)*vertices[3*3*i + 3*0 + Y];
+		tempVertices[3*0 + Z] = a*vertices[3*3*i + 3*1 + Z] + (1 - a)*vertices[3*3*i + 3*0 + Z];
+		
+		tempVertices[3*1 + X] = a*vertices[3*3*i + 3*2 + X] + (1 - a)*vertices[3*3*i + 3*1 + X];
+		tempVertices[3*1 + Y] = a*vertices[3*3*i + 3*2 + Y] + (1 - a)*vertices[3*3*i + 3*1 + Y];
+		tempVertices[3*1 + Z] = a*vertices[3*3*i + 3*2 + Z] + (1 - a)*vertices[3*3*i + 3*1 + Z];
+		
+		tempVertices[3*2 + X] = a*vertices[3*3*i + 3*0 + X] + (1 - a)*vertices[3*3*i + 3*2 + X];
+		tempVertices[3*2 + Y] = a*vertices[3*3*i + 3*0 + Y] + (1 - a)*vertices[3*3*i + 3*2 + Y];
+		tempVertices[3*2 + Z] = a*vertices[3*3*i + 3*0 + Z] + (1 - a)*vertices[3*3*i + 3*2 + Z];
+		
+		memcpy(&vertices[3*3*(i + 1)], tempVertices, 3*3*sizeof(float));
+		memcpy(&colors[3*4*(i + 1)], tempColors, 3*4*sizeof(float));
+	}
+	ourContext->cgClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	//ourContext->cgEnable(CG_DEPTH_TEST);
+	//ourContext->cgEnable(CG_CULL_FACE);
+	ourContext->cgEnable(CG_BLEND);
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors);
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 20
+		*
+		3);
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_AwesomeTriangle);
+
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
