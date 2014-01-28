@@ -48,6 +48,16 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 #endif
 
 //---------------------------------------------------------------------------
+// Hausaufgabe 1 - Aufgabe 1c  |  Funktion erstellt
+//---------------------------------------------------------------------------
+#if defined(HA1)
+void makeScreenshot()
+{
+
+}
+#endif
+
+//---------------------------------------------------------------------------
 // Hausaufgabe 1  |  Eigenes Bild-Format
 //---------------------------------------------------------------------------
 #if defined(HA1)
@@ -63,7 +73,9 @@ float pos[7 * 6 * 3 * 2];
 float color[7 * 6 * 4 * 2];
 
 //---------------------------------------------------------------------------
-// Übung 03 - Aufgabe 1a  |  programStep erstellt
+// Hausaufgabe 1 - Aufgabe 1b  |  programStep erstellt und konfiguriert
+// Hausaufgabe 1 - Aufgabe 1c  |  Funktion makeScreenshoot wird bei
+//							   |  Tastendruck aufgerufen
 //---------------------------------------------------------------------------
 void programStep_DrawMatNr()
 {
@@ -160,6 +172,8 @@ void programStep_DrawMatNr()
 	// render
 	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
 	ourContext->cgDrawArrays(CG_LINES, 0, 6 * 7 * 2);
+
+	if (CG1Helper::isKeyReleased('s')) makeScreenshot();
 }
 
 //---------------------------------------------------------------------------
