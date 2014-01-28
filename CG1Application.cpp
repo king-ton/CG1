@@ -48,16 +48,6 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 #endif
 
 //---------------------------------------------------------------------------
-// Hausaufgabe 1 - Aufgabe 1c  |  Funktion erstellt
-//---------------------------------------------------------------------------
-#if defined(HA1)
-void makeScreenshot()
-{
-
-}
-#endif
-
-//---------------------------------------------------------------------------
 // Hausaufgabe 1  |  Eigenes Bild-Format
 //---------------------------------------------------------------------------
 #if defined(HA1)
@@ -73,107 +63,123 @@ float pos[7 * 6 * 3 * 2];
 float color[7 * 6 * 4 * 2];
 
 //---------------------------------------------------------------------------
+// Hausaufgabe 1 - Aufgabe 1c  |  Funktion erstellt
+// Hausaufgabe 1 - Aufgabe 1d  |  Frame-Buffer lesen und speichern
+//---------------------------------------------------------------------------
+#if defined(HA1)
+void makeScreenshot()
+{
+	unsigned char* ssBuffer = (unsigned char*)malloc(4 * FRAME_WIDTH * FRAME_HEIGHT);
+	ourContext->cgReadPixels(ssBuffer);
+
+	free(ssBuffer);
+}
+#endif
+
+//---------------------------------------------------------------------------
 // Hausaufgabe 1 - Aufgabe 1b  |  programStep erstellt und konfiguriert
 // Hausaufgabe 1 - Aufgabe 1c  |  Funktion makeScreenshoot wird bei
 //							   |  Tastendruck aufgerufen
 //---------------------------------------------------------------------------
 void programStep_DrawMatNr()
 {
-	int matNr = MATNR;
+	if (pos[0] == NULL) {
+		int matNr = MATNR;
 
-	for (int i = 0; i < 7 * 6 * 3 * 2; i++) {
-		pos[i] = 0;
+		for (int i = 0; i < 7 * 6 * 3 * 2; i++) {
+			pos[i] = 0;
+		}
+		for (int i = 0; i < 7 * 6 * 4 * 2; i++) {
+			color[i] = 1;
+		}
+
+		for (int anzeige = 5; anzeige >= 0; anzeige--) {
+			int ziffer = matNr % 10;
+			matNr = (int)(matNr / 10);
+
+			//		  2
+			//		 ---
+			//	  4 | 1 | 6
+			//		 ---
+			//	  3 |   | 5
+			//		 ---
+			//		  0
+
+			// Segment 0, 1, 2
+			for (int i = 0; i < 3; i++) {
+				pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 0] = 1 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 1] = i * 5;
+				pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 3] = 4 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 4] = i * 5;
+			}
+
+			// Segment 3, 4
+			for (int i = 0; i < 2; i++) {
+				pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 0] = 0 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 1] = 1 + i * 5;
+				pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 3] = 0 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 4] = 4 + i * 5;
+			}
+
+			// Segment 5, 6
+			for (int i = 0; i < 2; i++) {
+				pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 0] = 5 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 1] = 1 + i * 5;
+				pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 3] = 5 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 4] = 4 + i * 5;
+			}
+
+			// Farbe
+			// Segment 0
+			if (ziffer != 1 && ziffer != 4 && ziffer != 7) {
+				color[anzeige * 7 * 2 * 4 + 0 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 0 * 4 * 2 + 2] = 0;
+				color[anzeige * 7 * 2 * 4 + 0 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 0 * 4 * 2 + 6] = 0;
+			}
+
+			// Segment 1
+			if (ziffer != 0 && ziffer != 1 && ziffer != 7) {
+				color[anzeige * 7 * 2 * 4 + 1 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 1 * 4 * 2 + 2] = 0;
+				color[anzeige * 7 * 2 * 4 + 1 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 1 * 4 * 2 + 6] = 0;
+			}
+
+			// Segment 2
+			if (ziffer != 1 && ziffer != 4) {
+				color[anzeige * 7 * 2 * 4 + 2 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 2 * 4 * 2 + 2] = 0;
+				color[anzeige * 7 * 2 * 4 + 2 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 2 * 4 * 2 + 6] = 0;
+			}
+
+			// Segment 3
+			if (ziffer == 0 || ziffer == 2 || ziffer == 6 || ziffer == 8) {
+				color[anzeige * 7 * 2 * 4 + 3 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 3 * 4 * 2 + 2] = 0;
+				color[anzeige * 7 * 2 * 4 + 3 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 3 * 4 * 2 + 6] = 0;
+			}
+
+			// Segment 4
+			if (ziffer != 1 && ziffer != 2 && ziffer != 3 && ziffer != 7) {
+				color[anzeige * 7 * 2 * 4 + 4 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 4 * 4 * 2 + 2] = 0;
+				color[anzeige * 7 * 2 * 4 + 4 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 4 * 4 * 2 + 6] = 0;
+			}
+
+			// Segment 5
+			if (ziffer != 2) {
+				color[anzeige * 7 * 2 * 4 + 5 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 5 * 4 * 2 + 2] = 0;
+				color[anzeige * 7 * 2 * 4 + 5 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 5 * 4 * 2 + 6] = 0;
+			}
+
+			// Segment 6
+			if (ziffer != 5 && ziffer != 6) {
+				color[anzeige * 7 * 2 * 4 + 6 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 6 * 4 * 2 + 2] = 0;
+				color[anzeige * 7 * 2 * 4 + 6 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 6 * 4 * 2 + 6] = 0;
+			}
+		}
+
+		// clear
+		ourContext->cgClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		ourContext->cgClear(CG_COLOR_BUFFER_BIT);
+		// set capabilities and vertex pointers
+		ourContext->cgEnable(CG_USE_BRESENHAM);
+		ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, pos);
+		ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, color);
+		// render
+		ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+		ourContext->cgDrawArrays(CG_LINES, 0, 6 * 7 * 2);
+
+		if (CG1Helper::isKeyReleased('s')) makeScreenshot();
 	}
-	for (int i = 0; i < 7 * 6 * 4 * 2; i++) {
-		color[i] = 1;
-	}
-
-	for (int anzeige = 5; anzeige >= 0; anzeige--) {
-		int ziffer = matNr % 10;
-		matNr = (int) (matNr / 10);
-
-		//		  2
-		//		 ---
-		//	  4 | 1 | 6
-		//		 ---
-		//	  3 |   | 5
-		//		 ---
-		//		  0
-
-		// Segment 0, 1, 2
-		for (int i = 0; i < 3; i++) {
-			pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 0] = 1 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 1] = i*5;
-			pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 3] = 4 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 4] = i*5;
-		}
-
-		// Segment 3, 4
-		for (int i = 0; i < 2; i++) {
-			pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 0] = 0 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 1] = 1 + i * 5;
-			pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 3] = 0 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 4] = 4 + i * 5;
-		}
-
-		// Segment 5, 6
-		for (int i = 0; i < 2; i++) {
-			pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 0] = 5 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 1] = 1 + i * 5;
-			pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 3] = 5 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 4] = 4 + i * 5;
-		}
-
-		// Farbe
-		// Segment 0
-		if (ziffer != 1 && ziffer != 4 && ziffer != 7) {
-			color[anzeige * 7 * 2 * 4 + 0 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 0 * 4 * 2 + 2] = 0;
-			color[anzeige * 7 * 2 * 4 + 0 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 0 * 4 * 2 + 6] = 0;
-		}
-
-		// Segment 1
-		if (ziffer != 0 && ziffer != 1 && ziffer != 7) {
-			color[anzeige * 7 * 2 * 4 + 1 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 1 * 4 * 2 + 2] = 0;
-			color[anzeige * 7 * 2 * 4 + 1 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 1 * 4 * 2 + 6] = 0;
-		}
-
-		// Segment 2
-		if (ziffer != 1 && ziffer != 4) {
-			color[anzeige * 7 * 2 * 4 + 2 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 2 * 4 * 2 + 2] = 0;
-			color[anzeige * 7 * 2 * 4 + 2 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 2 * 4 * 2 + 6] = 0;
-		}
-
-		// Segment 3
-		if (ziffer == 0 || ziffer == 2 || ziffer == 6 || ziffer == 8) {
-			color[anzeige * 7 * 2 * 4 + 3 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 3 * 4 * 2 + 2] = 0;
-			color[anzeige * 7 * 2 * 4 + 3 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 3 * 4 * 2 + 6] = 0;
-		}
-
-		// Segment 4
-		if (ziffer != 1 && ziffer != 2 && ziffer != 3 && ziffer != 7) {
-			color[anzeige * 7 * 2 * 4 + 4 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 4 * 4 * 2 + 2] = 0;
-			color[anzeige * 7 * 2 * 4 + 4 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 4 * 4 * 2 + 6] = 0;
-		}
-
-		// Segment 5
-		if (ziffer != 2) {
-			color[anzeige * 7 * 2 * 4 + 5 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 5 * 4 * 2 + 2] = 0;
-			color[anzeige * 7 * 2 * 4 + 5 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 5 * 4 * 2 + 6] = 0;
-		}
-
-		// Segment 6
-		if (ziffer != 5 && ziffer != 6) {
-			color[anzeige * 7 * 2 * 4 + 6 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 6 * 4 * 2 + 2] = 0;
-			color[anzeige * 7 * 2 * 4 + 6 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 6 * 4 * 2 + 6] = 0;
-		}
-	}
-
-	// clear
-	ourContext->cgClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-	ourContext->cgClear(CG_COLOR_BUFFER_BIT);
-	// set capabilities and vertex pointers
-	ourContext->cgEnable(CG_USE_BRESENHAM);
-	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, pos);
-	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, color);
-	// render
-	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
-	ourContext->cgDrawArrays(CG_LINES, 0, 6 * 7 * 2);
-
-	if (CG1Helper::isKeyReleased('s')) makeScreenshot();
 }
 
 //---------------------------------------------------------------------------
