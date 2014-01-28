@@ -250,3 +250,14 @@ bool CGContext::m_cgValidateState()
 
 	return true;
 }
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 1 - Aufgabe 1a  |  Funktion hinzugefügt
+//---------------------------------------------------------------------------
+void CGContext::cgReadPixels(unsigned char* data)
+{
+	int W = m_frameBuffer.getWidth(),
+		H = m_frameBuffer.getHeight();
+
+	memcpy(data, m_frameBuffer.colorBuffer.getDataPointer(), W * H * 4);
+}

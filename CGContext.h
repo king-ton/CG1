@@ -11,6 +11,9 @@
 #include <string.h>
 
 //---------------------------------------------------------------------------
+// Hausaufgabe 1 - Aufgabe 1a  |  Funktion cgReadPixels registriert
+//---------------------------------------------------------------------------
+
 
 class CGContext 
 {
@@ -122,6 +125,9 @@ public:
 
 	/// Activate a texture unit and bind a named texture (these are two steps in OpenGL).
 	void cgActiveTexture_cgBindTexture_cgTexParameter(int textureUnit, int textureName, int filter, int wrap);
+
+	/// Reads all data from the current color buffer into the provided memory.
+	void cgReadPixels(unsigned char* data);
 
 private:
 	// Pipeline methods
