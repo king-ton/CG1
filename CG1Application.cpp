@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U6_4
+#define HA1
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -19,7 +19,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -36,7 +36,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -44,6 +44,136 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 	const CGUniformData& uniforms)
 {
 	out = in.varyings[CG_COLOR_VARYING];
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 1  |  Eigenes Bild-Format
+//---------------------------------------------------------------------------
+#if defined(HA1)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  46		// Framebuffer width.
+#define FRAME_HEIGHT 11		// Framebuffer height.
+#define FRAME_SCALE  10		// Integer scaling factors (zoom).
+
+#define MATNR 310550		// Matrikelnummer
+
+float pos[7 * 6 * 3 * 2];
+float color[7 * 6 * 4 * 2];
+
+//---------------------------------------------------------------------------
+// Übung 03 - Aufgabe 1a  |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_DrawMatNr()
+{
+	int matNr = MATNR;
+
+	for (int i = 0; i < 7 * 6 * 3 * 2; i++) {
+		pos[i] = 0;
+	}
+	for (int i = 0; i < 7 * 6 * 4 * 2; i++) {
+		color[i] = 1;
+	}
+
+	for (int anzeige = 5; anzeige >= 0; anzeige--) {
+		int ziffer = matNr % 10;
+		matNr = (int) (matNr / 10);
+
+		//		  2
+		//		 ---
+		//	  4 | 1 | 6
+		//		 ---
+		//	  3 |   | 5
+		//		 ---
+		//		  0
+
+		// Segment 0, 1, 2
+		for (int i = 0; i < 3; i++) {
+			pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 0] = 1 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 1] = i*5;
+			pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 3] = 4 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + i * 3 * 2 + 4] = i*5;
+		}
+
+		// Segment 3, 4
+		for (int i = 0; i < 2; i++) {
+			pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 0] = 0 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 1] = 1 + i * 5;
+			pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 3] = 0 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 3) * 3 * 2 + 4] = 4 + i * 5;
+		}
+
+		// Segment 5, 6
+		for (int i = 0; i < 2; i++) {
+			pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 0] = 5 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 1] = 1 + i * 5;
+			pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 3] = 5 + anzeige * 8; pos[anzeige * 7 * 2 * 3 + (i + 5) * 3 * 2 + 4] = 4 + i * 5;
+		}
+
+		// Farbe
+		// Segment 0
+		if (ziffer != 1 && ziffer != 4 && ziffer != 7) {
+			color[anzeige * 7 * 2 * 4 + 0 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 0 * 4 * 2 + 2] = 0;
+			color[anzeige * 7 * 2 * 4 + 0 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 0 * 4 * 2 + 6] = 0;
+		}
+
+		// Segment 1
+		if (ziffer != 0 && ziffer != 1 && ziffer != 7) {
+			color[anzeige * 7 * 2 * 4 + 1 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 1 * 4 * 2 + 2] = 0;
+			color[anzeige * 7 * 2 * 4 + 1 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 1 * 4 * 2 + 6] = 0;
+		}
+
+		// Segment 2
+		if (ziffer != 1 && ziffer != 4) {
+			color[anzeige * 7 * 2 * 4 + 2 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 2 * 4 * 2 + 2] = 0;
+			color[anzeige * 7 * 2 * 4 + 2 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 2 * 4 * 2 + 6] = 0;
+		}
+
+		// Segment 3
+		if (ziffer == 0 || ziffer == 2 || ziffer == 6 || ziffer == 8) {
+			color[anzeige * 7 * 2 * 4 + 3 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 3 * 4 * 2 + 2] = 0;
+			color[anzeige * 7 * 2 * 4 + 3 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 3 * 4 * 2 + 6] = 0;
+		}
+
+		// Segment 4
+		if (ziffer != 1 && ziffer != 2 && ziffer != 3 && ziffer != 7) {
+			color[anzeige * 7 * 2 * 4 + 4 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 4 * 4 * 2 + 2] = 0;
+			color[anzeige * 7 * 2 * 4 + 4 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 4 * 4 * 2 + 6] = 0;
+		}
+
+		// Segment 5
+		if (ziffer != 2) {
+			color[anzeige * 7 * 2 * 4 + 5 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 5 * 4 * 2 + 2] = 0;
+			color[anzeige * 7 * 2 * 4 + 5 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 5 * 4 * 2 + 6] = 0;
+		}
+
+		// Segment 6
+		if (ziffer != 5 && ziffer != 6) {
+			color[anzeige * 7 * 2 * 4 + 6 * 2 * 4 + 1] = 0; color[anzeige * 7 * 4 * 2 + 6 * 4 * 2 + 2] = 0;
+			color[anzeige * 7 * 2 * 4 + 6 * 2 * 4 + 5] = 0; color[anzeige * 7 * 4 * 2 + 6 * 4 * 2 + 6] = 0;
+		}
+	}
+
+	// clear
+	ourContext->cgClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT);
+	// set capabilities and vertex pointers
+	ourContext->cgEnable(CG_USE_BRESENHAM);
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, pos);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, color);
+	// render
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgDrawArrays(CG_LINES, 0, 6 * 7 * 2);
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_DrawMatNr);
+
+	CG1Helper::runApplication();
+
+	return 0;
 }
 #endif
 
