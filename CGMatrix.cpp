@@ -7,7 +7,8 @@
 //---------------------------------------------------------------------------
 // CGMATRIX4X4 : Static (factory) functions.
 //
-// Hausaufgabe 1 - Aufgabe 2.1  |  Alle Funktionen implementiert
+// Hausaufgabe 2 - Aufgabe 2.1  |  Alle Funktionen implementiert
+// Hausaufgabe 2 - Aufgabe 2.2  |  Darstellung von debugPrint verbessert
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getIdentityMatrix()
 {
@@ -164,12 +165,17 @@ CGMatrix4x4 CGMatrix4x4::operator*(const CGMatrix4x4& b) const
 //---------------------------------------------------------------------------
 void CGMatrix4x4::debugPrint(const char *prefix) const
 {
-	if (prefix == NULL)
-		prefix = "";
-	printf("%s[%f %f %f %f]\n", prefix, m_matrix[0][0], m_matrix[1][0], m_matrix[2][0], m_matrix[3][0]);
-	printf("%s[%f %f %f %f]\n", prefix, m_matrix[0][1], m_matrix[1][1], m_matrix[2][1], m_matrix[3][1]);
-	printf("%s[%f %f %f %f]\n", prefix, m_matrix[0][2], m_matrix[1][2], m_matrix[2][2], m_matrix[3][2]);
-	printf("%s[%f %f %f %f]\n", prefix, m_matrix[0][3], m_matrix[1][3], m_matrix[2][3], m_matrix[3][3]);
+	for (int i = 0; i < 4; i++){
+		if (prefix != NULL) {
+			printf(prefix);
+			printf(": ");
+		}
+		for (int j = 0; j < 4; j++) {
+			printf("%f ", m_matrix[j][i]);
+		}
+		printf("\n");
+	}
+	printf("\n");
 
 }
 //---------------------------------------------------------------------------

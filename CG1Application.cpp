@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define HA1
+#define HA2
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -200,6 +200,47 @@ int main(int argc, char** argv)
 	CG1Helper::runApplication();
 
 	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 2  |  Matrixoperationen
+//---------------------------------------------------------------------------
+#if defined(HA2)
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 2 - Aufgabe 2.2  |  CGMatrix testen
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	freopen("Ausagbe.txt", "w", stdout);
+
+	CGMatrix4x4 res, trans, skal, rot;
+	CGVec4 vec, resV;
+
+	trans = CGMatrix4x4::getTranslationMatrix(1.0F, 2.0F, 3.0F);
+	skal = CGMatrix4x4::getScaleMatrix(2.0F, 2.0F, 1.0F);
+	res = trans * skal * trans;
+	res.debugPrint("A");
+
+	rot = CGMatrix4x4::getRotationMatrixX(90);
+	trans = CGMatrix4x4::getTranslationMatrix(10, 0, 0);
+	vec.set(0, 1, 0, 1);
+	resV = rot * trans * vec;
+	printf("B: %f %f %f %f\n\n", resV[0], resV[1], resV[2], resV[3]);
+
+	rot = CGMatrix4x4::getRotationMatrixY(123);
+	rot.transpose();
+	rot.debugPrint("C");
+
+	rot = CGMatrix4x4::getRotationMatrixZ(100);
+	rot.invert();
+	rot.debugPrint("D");
+
+	freopen("CON", "w", stdout);
+
+	printf("Die Ergebnis-Matrizen wurde in Datei \"Ausgabe.txt\" geschrieben.\n");
+	system("PAUSE");
 }
 #endif
 
