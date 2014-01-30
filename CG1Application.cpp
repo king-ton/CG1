@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define HA2
+#define U7
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -23,7 +23,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(const CGVertexAttributes& in,
@@ -40,7 +40,7 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -815,6 +815,88 @@ int main(int argc, char** argv)
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
 
 	CG1Helper::setProgramStep(programStep_AwesomeTriangle);
+
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 07  |  Perspektivische Projektion
+//---------------------------------------------------------------------------
+#if defined(U7)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  500	// Framebuffer width.
+#define FRAME_HEIGHT 300	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Übung 07 - Aufgabe 1a  |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_ProjectionTest()
+{
+	// Create a unit-cube which is later (manually) transformed.
+	// Hint: this is just a hack as long as we have no model transformation,
+	// i. e. do not attempt this at home!
+	float vertices4cube[12*3*3] = { 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0,	// FRONT
+									0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1,	// BACK
+									0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0,	// LEFT
+									1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1,	// RIGHT
+									0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0,	// TOP
+									0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0 };	// BOTTOM
+	float colors4cube[12*3*4];
+	for (int i = 0; i<36; i++) {
+		// compute colors from temporary vertex positions:
+		colors4cube[4*i + 0] = vertices4cube[3*i + 0];
+		colors4cube[4*i + 1] = vertices4cube[3*i + 1];
+		colors4cube[4*i + 2] = vertices4cube[3*i + 2];
+		colors4cube[4*i + 3] = 1.0f;
+		// compute (manually!) transformed vertex positions:
+		vertices4cube[3*i + 0] = vertices4cube[3*i + 0]*0.5f + 0.5f;
+		vertices4cube[3*i + 1] = vertices4cube[3*i + 1]*0.5f - 1.0f;
+		vertices4cube[3*i + 2] = vertices4cube[3*i + 2]*0.5f - 2.0f;
+	}
+
+	// ground plane
+	CGMatrix4x4 projMat;
+	float f = 1.1;
+	projMat = CGMatrix4x4::getFrustum(-0.1f, 0.1f, -0.1f, 0.1f, 0.1f, 2.0f);
+	float proj[16]; projMat.getFloatsToColMajor(proj);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
+
+	ourContext->cgClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgEnable(CG_CULL_FACE); // !
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4cube);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4cube);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 12*3);
+
+	// Plus: draw a ground plane:
+	float vertices4ground[6*3] = { -1, -1, -1, 1, -1, -1, 1, -1, -3, -1, -1, -1, 1, -1, -3, -1, -1, -3 };
+	float colors4ground[6*4];
+	for (int i = 6; i--;) {
+		float* c = colors4ground + 4*i; 
+		c[0] = c[1] = c[2] = 0.8f;
+		c[3] = 1.0f;
+	}
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4ground);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4ground);
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 2*3);
+}
+//---------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_ProjectionTest);
 
 	CG1Helper::runApplication();
 
