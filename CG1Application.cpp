@@ -23,7 +23,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(	const CGVertexAttributes& in,
@@ -851,6 +851,7 @@ int main(int argc, char** argv)
 
 //---------------------------------------------------------------------------
 // Übung 07 - Aufgabe 1a  |  programStep erstellt
+// Übung 07 - Aufgabe 2c  |  Neues Vertex-Programm wird verwendet
 //---------------------------------------------------------------------------
 void programStep_ProjectionTest()
 {
@@ -901,7 +902,7 @@ void programStep_ProjectionTest()
 	}
 	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4ground);
 	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4ground);
-	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgUseProgram(projectionVertexProgram, passthroughFragmentProgram);
 	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 2*3);
 }
 //---------------------------------------------------------------------------
