@@ -101,6 +101,7 @@ void CGContext::m_cgPrimitiveProcessing()
 	// Purge vertex list.
 	m_pipelineVerticesCount = 0;
 }
+
 //---------------------------------------------------------------------------
 // Koordinaten werden vom Clip-Space in normalisierte Geräte-Koordinaten
 // überführt
@@ -119,6 +120,12 @@ void CGContext::m_cgVertexPerspectiveDivide(int pipelineVertex)
 	pos[1] = pos[1] * pos[3];
 	pos[2] = pos[2] * pos[3];
 }
+
+//---------------------------------------------------------------------------
+// Koordinaten werden von normalisierte Geräte-Koordinaten in Window-Space
+// überführt
+//
+// Übung 07 - Aufgabe 2e  |  Umwandlung in Windows-Space
 //---------------------------------------------------------------------------
 void CGContext::m_cgVertexViewportTransform(int pipelineVertex)
 {
@@ -126,6 +133,7 @@ void CGContext::m_cgVertexViewportTransform(int pipelineVertex)
 	CGVertexVaryings& v=m_pipelineVertexVaryings[pipelineVertex];
 	CGVec4 &pos = v.varyings[CG_POSITION_VARYING];
 
-	// Transform from Clip Space To Normalized Device Coordinates
-	// ...
+	// Transform from Normalized Device Coordinates To Window Space
+	pos[0] = (pos[0] + 1) * m_frameBuffer.getWidth() / 2;
+	pos[1] = (pos[1] + 1) * m_frameBuffer.getHeight() / 2;
 }
