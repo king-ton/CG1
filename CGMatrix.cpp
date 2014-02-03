@@ -78,7 +78,7 @@ CGMatrix4x4 CGMatrix4x4::getRotationMatrix(float angle, float x, float y, float 
 }
 //---------------------------------------------------------------------------
 // Gibt Projektionsmatrix zurück, für die Transformation von Pyramidenstumpf
-// in einen Würfel (-1 <= x,y,z <= 1)
+// in einen Würfel
 //
 // Übung 07 - Aufgabe 2a  |  Funktion implementiert
 //---------------------------------------------------------------------------
