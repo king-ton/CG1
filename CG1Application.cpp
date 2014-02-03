@@ -26,11 +26,28 @@ CGContext *ourContext;
 #if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
-void passthroughVertexProgram(const CGVertexAttributes& in,
-	CGVertexVaryings& out,
-	const CGUniformData& uniforms)
+void passthroughVertexProgram(	const CGVertexAttributes& in,
+								CGVertexVaryings& out,
+								const CGUniformData& uniforms)
 {
 	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
+	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
+	out.varyings[CG_COLOR_VARYING] = in.attributes[CG_COLOR_ATTRIBUTE];
+	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 07 - Aufgabe 2b  |  Vertex-Programm erstellt, Transformation der
+//							 Vertex-Position mithilfe der Projektions-Matrix
+//---------------------------------------------------------------------------
+#if defined(U7)
+void projectionVertexProgram(	const CGVertexAttributes& in,
+								CGVertexVaryings& out,
+								const CGUniformData& uniforms)
+{
+	out.varyings[CG_POSITION_VARYING] = uniforms.projectionMatrix * in.attributes[CG_POSITION_ATTRIBUTE];
+
 	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
 	out.varyings[CG_COLOR_VARYING] = in.attributes[CG_COLOR_ATTRIBUTE];
 	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
@@ -44,8 +61,8 @@ void passthroughVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
-	CGVec4& out,
-	const CGUniformData& uniforms)
+								CGVec4& out,
+								const CGUniformData& uniforms)
 {
 	out = in.varyings[CG_COLOR_VARYING];
 }
