@@ -9,6 +9,7 @@
 //
 // Hausaufgabe 2 - Aufgabe 2.1  |  Alle Funktionen implementiert
 // Hausaufgabe 2 - Aufgabe 2.2  |  Darstellung von debugPrint verbessert
+// Übung 07      - Aufgabe 2a   |  Funktion getFrustum implementiert
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getIdentityMatrix()
 {
@@ -76,12 +77,21 @@ CGMatrix4x4 CGMatrix4x4::getRotationMatrix(float angle, float x, float y, float 
 	return rot;
 }
 //---------------------------------------------------------------------------
+// Gibt Projektionsmatrix zurück, für die Transformation von Pyramidenstumpf
+// in einen Würfel (-1 <= x,y,z <= 1)
+//
+// Übung 07 - Aufgabe 2a  |  Funktion implementiert
+//---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getFrustum(float left, float right, float bottom, float top, float zNear, float zFar)
 {
+	float pm[16] = {	2 * zNear / (right - left),	0, (right + left) / (right - left), 0,
+						0, 2 * zNear / (top - bottom), (top + bottom) / (top - bottom), 0,
+						0, 0, -1 * (zFar + zNear) / (zFar - zNear), -2 * zFar*zNear / (zFar - zNear),
+						0, 0, -1, 0 };
+
 	CGMatrix4x4 f;
-	// NICHT TEIL DER PVL2
-	// diese Funktion wird im Verlauf der normalen Uebung implemntiert!
-	// ...
+	f.setFloatsFromRowMajor(pm);
+
 	return f;
 }
 //---------------------------------------------------------------------------
