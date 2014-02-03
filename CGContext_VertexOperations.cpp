@@ -102,6 +102,11 @@ void CGContext::m_cgPrimitiveProcessing()
 	m_pipelineVerticesCount = 0;
 }
 //---------------------------------------------------------------------------
+// Koordinaten werden vom Clip-Space in normalisierte Geräte-Koordinaten
+// überführt
+//
+// Übung 07 - Aufgabe 2d  |  Umwandlung in normalisierte Geräte-Koordinaten
+//---------------------------------------------------------------------------
 void CGContext::m_cgVertexPerspectiveDivide(int pipelineVertex)
 {
 	// We are interested in the last vertex (as always if no vertex index available).
@@ -109,7 +114,10 @@ void CGContext::m_cgVertexPerspectiveDivide(int pipelineVertex)
 	CGVec4 &pos = v.varyings[CG_POSITION_VARYING];
 
 	// Transform from Clip Space To Normalized Device Coordinates
-	// ...
+	pos[3] = 1 / pos[3];
+	pos[0] = pos[0] * pos[3];
+	pos[1] = pos[1] * pos[3];
+	pos[2] = pos[2] * pos[3];
 }
 //---------------------------------------------------------------------------
 void CGContext::m_cgVertexViewportTransform(int pipelineVertex)
