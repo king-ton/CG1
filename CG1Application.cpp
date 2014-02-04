@@ -1010,14 +1010,48 @@ void drawTree(CGMatrix4x4 transform)
 }
 
 //---------------------------------------------------------------------------
+// Erstellt die View-Matrix
+//
 // Übung 08 - Aufgabe 1a  |  Funktion erstellt
+// Übung 08 - Aufgabe 4a  |  Funktion implementiert
 //---------------------------------------------------------------------------
 CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 						float centerX,	float centerY,	float centerZ,
 						float upX,		float upY,		float upZ)
 {
-	// A4 a)
 	CGMatrix4x4 V;
+	float R[16];
+
+	R[8] = centerX - eyeX; R[9] = centerY - eyeY; R[10] = centerZ - eyeZ;
+	R[11] = 1 / sqrt(R[8] * R[8] + R[9] * R[9] + R[10] * R[10]);
+
+	R[8] = R[8] * R[11];R[9] = R[9] * R[11]; R[10] = R[10] * R[11];
+
+	R[0] = R[9] * upZ - R[10] * upY; R[1] = R[10] * upX - R[8] * upZ; R[2] = R[8] * upY - R[9] * upX;
+	R[3] = 1 / sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2]);
+
+	R[0] = R[0] * R[3];
+	R[1] = R[1] * R[3];
+	R[2] = R[2] * R[3];
+	R[3] = 0;
+
+	R[4] = R[1] * R[10] - R[2] * R[9];
+	R[5] = R[2] * R[8] - R[0] * R[10];
+	R[6] = R[0] * R[9] - R[1] * R[8];
+	R[7] = 0;
+
+	R[8] = R[8] * (-1);
+	R[9] = R[9] * (-1);
+	R[10] = R[10] * (-1);
+	R[11] = 0;
+
+	R[12] = 0;
+	R[13] = 0;
+	R[14] = 0;
+	R[15] = 1;
+
+	V.setFloatsFromRowMajor(R);
+	V = V * CGMatrix4x4::getTranslationMatrix((-1)*eyeX, (-1)*eyeY, (-1)*eyeZ);
 	return V;
 }
 
@@ -1047,10 +1081,10 @@ void programStep_HappyHolidays()
 	ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram);
 	// A4 b)
 	// Camera rotating around center on r=15 circle.
-	//static float anim = 0.0; anim+=0.01;
-	//float eyeX = cos(anim)*15.0f, eyeY = 15.0f, eyeZ = sin(anim)*15.0f;
-	//CGMatrix4x4 viewT = cguLookAt(eyeX,eyeY,eyeZ, 0,2,0, 0,1,0);
-	CGMatrix4x4 viewT = CGMatrix4x4::getTranslationMatrix(0.0f, -5.0, -25.0f);
+	static float anim = 0.0; anim+=0.01;
+	float eyeX = cos(anim)*15.0f, eyeY = 15.0f, eyeZ = sin(anim)*15.0f;
+	CGMatrix4x4 viewT = cguLookAt(eyeX,eyeY,eyeZ, 0,2,0, 0,1,0);
+	//CGMatrix4x4 viewT = CGMatrix4x4::getTranslationMatrix(0.0f, -5.0, -25.0f);
 
 	drawGround(viewT);
 	for (int i = 10; i--;) {
