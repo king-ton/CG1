@@ -53,8 +53,8 @@ void CGContext::m_cgFragmentPipeline(CGFragmentData& fragment)
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentClipping(CGFragmentData& fragment)
 {
-	if (fragment.coordinates[X] >= m_viewport[2] ||
-		fragment.coordinates[Y] >= m_viewport[3] ||
+	if (fragment.coordinates[X] >= m_viewport[0] + m_viewport[2] ||
+		fragment.coordinates[Y] >= m_viewport[1] + m_viewport[3] ||
 		fragment.coordinates[X] < m_viewport[0] ||
 		fragment.coordinates[Y] < m_viewport[1] ||
 		fragment.varyings[CG_POSITION_VARYING][Z] < -1 ||
