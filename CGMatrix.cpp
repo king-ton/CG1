@@ -16,6 +16,7 @@ CGMatrix4x4 CGMatrix4x4::getIdentityMatrix()
 	CGMatrix4x4 m;
 	return m;
 }
+
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getTranslationMatrix(float x, float y, float z)
 {
@@ -23,22 +24,25 @@ CGMatrix4x4 CGMatrix4x4::getTranslationMatrix(float x, float y, float z)
 	m.m_matrix[3][0] = x; m.m_matrix[3][1] = y; m.m_matrix[3][2] = z;
 	return m;
 }
+
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getRotationMatrixX(float angle)
 {
 	return CGMatrix4x4::getRotationMatrix(angle, 1.0f, 0.0f, 0.0f);
-
 }
+
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getRotationMatrixY(float angle)
 {
 	return CGMatrix4x4::getRotationMatrix(angle, 0.0f, 1.0f, 0.0f);
 }
+
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getRotationMatrixZ(float angle)
 {
 	return CGMatrix4x4::getRotationMatrix(angle, 0.0f, 0.0f, 1.0f);
 }
+
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getScaleMatrix(float x, float y, float z)
 {
@@ -46,6 +50,7 @@ CGMatrix4x4 CGMatrix4x4::getScaleMatrix(float x, float y, float z)
 	m.m_matrix[0][0] = x; m.m_matrix[1][1] = y; m.m_matrix[2][2] = z;
 	return m;
 }
+
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getRotationMatrix(float angle, float x, float y, float z)
 {
@@ -76,24 +81,28 @@ CGMatrix4x4 CGMatrix4x4::getRotationMatrix(float angle, float x, float y, float 
 	rot.m_matrix[2][2] = z * z_one_minus_c + c;
 	return rot;
 }
+
 //---------------------------------------------------------------------------
 // Gibt Projektionsmatrix zurück, für die Transformation von Pyramidenstumpf
 // in einen Würfel
 //
 // Übung 07 - Aufgabe 2a  |  Funktion implementiert
+// Übung 08 - Aufgabe 1b  |  Funktion durch Musterlösung ersetzt
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::getFrustum(float left, float right, float bottom, float top, float zNear, float zFar)
 {
-	float pm[16] = {	2 * zNear / (right - left),	0, (right + left) / (right - left), 0,
-						0, 2 * zNear / (top - bottom), (top + bottom) / (top - bottom), 0,
-						0, 0, -1 * (zFar + zNear) / (zFar - zNear), -2 * zFar*zNear / (zFar - zNear),
-						0, 0, -1, 0 };
-
 	CGMatrix4x4 f;
-	f.setFloatsFromRowMajor(pm);
-
+	f.m_matrix[0][0] = (2.0f * zNear) / (right - left);
+	f.m_matrix[1][1] = (2.0f * zNear) / (top - bottom);
+	f.m_matrix[2][0] = (right + left) / (right - left);
+	f.m_matrix[2][1] = (top + bottom) / (top - bottom);
+	f.m_matrix[2][2] = (-zNear - zFar) / (zFar - zNear);
+	f.m_matrix[2][3] = -1.0f;
+	f.m_matrix[3][2] = (2.0f * zFar * zNear) / (zNear - zFar);
+	f.m_matrix[3][3] = 0.0f;
 	return f;
 }
+
 //---------------------------------------------------------------------------
 // CGMATRIX4X4 : Non-static operants.
 //---------------------------------------------------------------------------
@@ -101,16 +110,19 @@ CGMatrix4x4::CGMatrix4x4()
 {
 	identity();
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::getFloatsToColMajor(float *floats) const
 {
 	memcpy(floats, m_matrix, sizeof(float)* 16);
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::setFloatsFromColMajor(const float *floats)
 {
 	memcpy(m_matrix, floats, sizeof(float)* 16);
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::getFloatsToRowMajor(float *floats) const
 {
@@ -131,6 +143,7 @@ void CGMatrix4x4::getFloatsToRowMajor(float *floats) const
 	floats[14] = m_matrix[2][3];
 	floats[15] = m_matrix[3][3];
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::setFloatsFromRowMajor(const float *floats)
 {
@@ -151,6 +164,7 @@ void CGMatrix4x4::setFloatsFromRowMajor(const float *floats)
 	m_matrix[3][2] = floats[11];
 	m_matrix[3][3] = floats[15];
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::identity()
 {
@@ -160,6 +174,7 @@ void CGMatrix4x4::identity()
 	m_matrix[0][3] = 0.0f; m_matrix[1][3] = 0.0f; m_matrix[2][3] = 0.0f; m_matrix[3][3] = 1.0f;
 
 }
+
 //---------------------------------------------------------------------------
 CGMatrix4x4 CGMatrix4x4::operator*(const CGMatrix4x4& b) const
 {
@@ -172,6 +187,7 @@ CGMatrix4x4 CGMatrix4x4::operator*(const CGMatrix4x4& b) const
 	}
 	return r;
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::debugPrint(const char *prefix) const
 {
@@ -188,6 +204,7 @@ void CGMatrix4x4::debugPrint(const char *prefix) const
 	printf("\n");
 
 }
+
 //---------------------------------------------------------------------------
 CGVec4 CGMatrix4x4::operator*(const CGVec4& b) const
 {
@@ -199,6 +216,7 @@ CGVec4 CGMatrix4x4::operator*(const CGVec4& b) const
 	}
 	return c;
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::transpose()
 {
@@ -212,6 +230,7 @@ void CGMatrix4x4::transpose()
 		}
 	}
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::invert()
 {
@@ -242,6 +261,7 @@ void CGMatrix4x4::invert()
 	m_matrix[0][3] = cof03 * inv_det; m_matrix[1][3] = cof13 * inv_det; m_matrix[2][3] = cof23 * inv_det; m_matrix[3][3] = cof33 * inv_det;
 
 }
+
 //---------------------------------------------------------------------------
 void CGMatrix4x4::frustum(float left, float right, float bottom, float top, float zNear, float zFar)
 {
