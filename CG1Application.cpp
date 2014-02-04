@@ -976,6 +976,7 @@ void drawGround(CGMatrix4x4 viewT)
 
 //---------------------------------------------------------------------------
 // Übung 08 - Aufgabe 1a  |  Funktion erstellt
+// Übung 08 - Aufgabe 3a  |  Stamm und Blätter geeignet transformiert
 //---------------------------------------------------------------------------
 void drawTree(CGMatrix4x4 transform)
 {
@@ -983,11 +984,10 @@ void drawTree(CGMatrix4x4 transform)
 	float floatValues[16];
 	// ZA5 a) // mehrere Layer davon zeichnen
 
-		// A3 )
-		//Trunk=
-		//Tleaf1=
-		//Tleaf2=
-		//Tleaf3=
+	Ttrunk = transform * CGMatrix4x4::getIdentityMatrix();
+	Tleaf1 = transform * CGMatrix4x4::getTranslationMatrix(0, 2.5, 0) * CGMatrix4x4::getRotationMatrixZ(225);
+	Tleaf2 = transform * CGMatrix4x4::getTranslationMatrix(0, 3.0, 0) * CGMatrix4x4::getScaleMatrix(0.8, 0.8, 0.8) * CGMatrix4x4::getRotationMatrixZ(225);
+	Tleaf3 = transform * CGMatrix4x4::getTranslationMatrix(0, 3.5, 0) * CGMatrix4x4::getScaleMatrix(0.5, 0.5, 0.5) * CGMatrix4x4::getRotationMatrixZ(225);
 
 	// TRUNK
 	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4trunk);
