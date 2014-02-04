@@ -123,9 +123,10 @@ void CGContext::m_cgVertexPerspectiveDivide(int pipelineVertex)
 
 //---------------------------------------------------------------------------
 // Koordinaten werden von normalisierte Geräte-Koordinaten in Window-Space
-// überführt
+// überführt, aber nur in einem bestimmten Bereich (viewport)
 //
 // Übung 07 - Aufgabe 2e  |  Umwandlung in Windows-Space
+// Übung 07 - Aufgabe 3a  |  ViewPort wird berücksichtigt
 //---------------------------------------------------------------------------
 void CGContext::m_cgVertexViewportTransform(int pipelineVertex)
 {
@@ -134,6 +135,6 @@ void CGContext::m_cgVertexViewportTransform(int pipelineVertex)
 	CGVec4 &pos = v.varyings[CG_POSITION_VARYING];
 
 	// Transform from Normalized Device Coordinates To Window Space
-	pos[0] = (pos[0] + 1) * m_frameBuffer.getWidth() / 2;
-	pos[1] = (pos[1] + 1) * m_frameBuffer.getHeight() / 2;
+	pos[0] = ((pos[0] + 1) * m_viewport[2] / 2) + m_viewport[0];
+	pos[1] = ((pos[1] + 1) * m_viewport[3] / 2) + m_viewport[1];
 }
