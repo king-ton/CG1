@@ -43,17 +43,20 @@ void CGContext::m_cgFragmentPipeline(CGFragmentData& fragment)
 }
 
 //---------------------------------------------------------------------------
+// Fragmente außerhalb des Bereiches (viewport) und |z| > 1 werden verworfen
+//
 // Übung 03 - Aufgabe 3a  |  Fragmente außerhalb des Framebuffers werden
 //						  |  verworfen
 // Übung 05 - Aufgabe 3a  |  Fragmente außerhalb des Z-Bereichs werden
 //						  |  verworfen
+// Übung 07 - Aufgabe 3b  |  ViewPort wird berücksichtigt
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentClipping(CGFragmentData& fragment)
 {
-	if (fragment.coordinates[X] >= m_frameBuffer.getWidth() || 
-		fragment.coordinates[Y] >= m_frameBuffer.getHeight() || 
-		fragment.coordinates[X] < 0 ||
-		fragment.coordinates[Y] < 0 ||
+	if (fragment.coordinates[X] >= m_viewport[2] ||
+		fragment.coordinates[Y] >= m_viewport[3] ||
+		fragment.coordinates[X] < m_viewport[0] ||
+		fragment.coordinates[Y] < m_viewport[1] ||
 		fragment.varyings[CG_POSITION_VARYING][Z] < -1 ||
 		fragment.varyings[CG_POSITION_VARYING][Z] > 1)
 		return false;
@@ -70,6 +73,9 @@ void CGContext::m_cgFragmentProgram(CGFragmentData& fragment)
 }
 
 //---------------------------------------------------------------------------
+// Überprüft, ob das aktuelle Fragment hinter dem Fragment aus dem
+// FrameBuffer liegt
+//
 // Übung 05 - Aufgabe 3d  |  Prüfen, ob Pixel dahinter liegt
 //---------------------------------------------------------------------------
 bool CGContext::m_cgFragmentZTest(CGFragmentData& fragment)
