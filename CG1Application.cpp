@@ -23,7 +23,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U8) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(	const CGVertexAttributes& in,
@@ -47,6 +47,24 @@ void projectionVertexProgram(	const CGVertexAttributes& in,
 								const CGUniformData& uniforms)
 {
 	out.varyings[CG_POSITION_VARYING] = uniforms.projectionMatrix * in.attributes[CG_POSITION_ATTRIBUTE];
+
+	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
+	out.varyings[CG_COLOR_VARYING] = in.attributes[CG_COLOR_ATTRIBUTE];
+	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 08 - Aufgabe 2a  |  Vertex-Programm erstellt, Transformation der
+//						  |	 Vertex-Position mithilfe der ModelView-Matrix
+//						  |  und der Projections-Matrix
+//---------------------------------------------------------------------------
+#if defined(U8)
+void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
+	CGVertexVaryings& out,
+	const CGUniformData& uniforms)
+{
+	out.varyings[CG_POSITION_VARYING] = uniforms.projectionMatrix * uniforms.modelviewMatrix * in.attributes[CG_POSITION_ATTRIBUTE];
 
 	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
 	out.varyings[CG_COLOR_VARYING] = in.attributes[CG_COLOR_ATTRIBUTE];
@@ -927,7 +945,7 @@ int main(int argc, char** argv)
 #endif
 
 //---------------------------------------------------------------------------
-// Übung 07  |  Perspektivische Projektion
+// Übung 08  |  Transformation
 //---------------------------------------------------------------------------
 #if defined(U8)
 //---------------------------------------------------------------------------
@@ -1015,6 +1033,7 @@ CGMatrix4x4 cguPerspective(float fov_y, float aspect, float zNear, float zFar)
 
 //---------------------------------------------------------------------------
 // Übung 08 - Aufgabe 1a  |  Funktion erstellt
+// Übung 08 - Aufgabe 2b  |  Verwendetes Vertex-Programm geändert
 //---------------------------------------------------------------------------
 void programStep_HappyHolidays()
 {
@@ -1025,7 +1044,7 @@ void programStep_HappyHolidays()
 	CGMatrix4x4 projMat = CGMatrix4x4::getFrustum(-0.062132f, 0.062132f, -0.041421f, 0.041421f, 0.1f, 50.0f);
 	float proj[16]; projMat.getFloatsToColMajor(proj);
 	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
-	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram);
 	// A4 b)
 	// Camera rotating around center on r=15 circle.
 	//static float anim = 0.0; anim+=0.01;
