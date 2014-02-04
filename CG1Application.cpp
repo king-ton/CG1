@@ -850,8 +850,11 @@ int main(int argc, char** argv)
 #define FRAME_SCALE  2		// Integer scaling factors (zoom).
 
 //---------------------------------------------------------------------------
+// Zeichnet einen bunten Quader in der hinteren Ecke auf grauem Grund
+//
 // Übung 07 - Aufgabe 1a  |  programStep erstellt
 // Übung 07 - Aufgabe 2c  |  Neues Vertex-Programm wird verwendet
+// Übung 07 - Aufgabe 3c  |  ViewPort hinzugefügt
 //---------------------------------------------------------------------------
 void programStep_ProjectionTest()
 {
@@ -904,6 +907,8 @@ void programStep_ProjectionTest()
 	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4ground);
 	ourContext->cgUseProgram(projectionVertexProgram, passthroughFragmentProgram);
 	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 2*3);
+
+	ourContext->cgViewport(100, 100, 300, 200);
 }
 //---------------------------------------------------------------------------
 
