@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U7
+#define U8
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -23,7 +23,7 @@ CGContext *ourContext;
 //---------------------------------------------------------------------------
 // VERTEX PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U8) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" vertex program
 void passthroughVertexProgram(	const CGVertexAttributes& in,
@@ -57,7 +57,7 @@ void projectionVertexProgram(	const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -910,7 +910,6 @@ void programStep_ProjectionTest()
 
 	ourContext->cgViewport(100, 100, 300, 200);
 }
-//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 int main(int argc, char** argv)
@@ -920,6 +919,137 @@ int main(int argc, char** argv)
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
 
 	CG1Helper::setProgramStep(programStep_ProjectionTest);
+
+	CG1Helper::runApplication();
+
+	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 07  |  Perspektivische Projektion
+//---------------------------------------------------------------------------
+#if defined(U8)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  580	// Framebuffer width.
+#define FRAME_HEIGHT 320	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+float vertices4trunk[3*3]	= {-0.2,0,0.1,		0.2,0,0.1,		0,2,0};
+float colors4trunk[3*4]		= {0.5,0.25,0,1,	0.5,0.25,0,1,	0.5,0.25,0,1};
+float vertices4leafs[3*3]	= {0,0,0,			2,0,0.2,		0,2,0.2};
+float colors4leafs[3*4]		= {1,1,1,1,			0,0.8,0,1,		0,0.5,0,1};
+float vertices4ground[6*3]	= {-10,0,-10, 10,0,10, 10,0,-10, -10,0,-10, -10,0,10, 10,0,10};
+float colors4ground[6*4]	= {0,1,0,1, 1,1,1,1, 0,1,0,1, 0,1,0,1, 1,1,1,1, 1,1,1,1};
+
+//---------------------------------------------------------------------------
+// Übung 08 - Aufgabe 1a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void drawGround(CGMatrix4x4 viewT)
+{
+	// GROUND
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4ground);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4ground);
+	float floatValues[16]; viewT.getFloatsToColMajor(floatValues);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX,1,false,floatValues);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 6);
+}
+
+//---------------------------------------------------------------------------
+// Übung 08 - Aufgabe 1a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void drawTree(CGMatrix4x4 transform)
+{
+	CGMatrix4x4 Ttrunk, Tleaf1, Tleaf2, Tleaf3;
+	float floatValues[16];
+	// ZA5 a) // mehrere Layer davon zeichnen
+
+		// A3 )
+		//Trunk=
+		//Tleaf1=
+		//Tleaf2=
+		//Tleaf3=
+
+	// TRUNK
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4trunk);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4trunk);
+	Ttrunk.getFloatsToColMajor(floatValues);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX,1,false,floatValues);
+	ourContext->cgDrawArrays(CG_TRIANGLES, 0, 3);
+
+	// LEAVES
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4leafs);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4leafs);
+
+	for(int i=3; i--;) {
+		if(i==0) Tleaf1.getFloatsToColMajor(floatValues);
+		else if(i==1) Tleaf2.getFloatsToColMajor(floatValues);
+		else Tleaf3.getFloatsToColMajor(floatValues);
+		ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX,1,false,floatValues);
+		ourContext->cgDrawArrays(CG_TRIANGLES, 0, 3);
+	}
+}
+
+//---------------------------------------------------------------------------
+// Übung 08 - Aufgabe 1a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
+						float centerX,	float centerY,	float centerZ,
+						float upX,		float upY,		float upZ)
+{
+	// A4 a)
+	CGMatrix4x4 V;
+	return V;
+}
+
+//---------------------------------------------------------------------------
+// Übung 08 - Aufgabe 1a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+CGMatrix4x4 cguPerspective(float fov_y, float aspect, float zNear, float zFar)
+{
+	// ZA6 a)
+	CGMatrix4x4 P;
+	return P;
+}
+
+//---------------------------------------------------------------------------
+// Übung 08 - Aufgabe 1a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void programStep_HappyHolidays()
+{
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgEnable(CG_CULL_FACE);
+	CGMatrix4x4 projMat = CGMatrix4x4::getFrustum(-0.062132f, 0.062132f, -0.041421f, 0.041421f, 0.1f, 50.0f);
+	float proj[16]; projMat.getFloatsToColMajor(proj);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
+	ourContext->cgUseProgram(passthroughVertexProgram, passthroughFragmentProgram);
+	// A4 b)
+	// Camera rotating around center on r=15 circle.
+	//static float anim = 0.0; anim+=0.01;
+	//float eyeX = cos(anim)*15.0f, eyeY = 15.0f, eyeZ = sin(anim)*15.0f;
+	//CGMatrix4x4 viewT = cguLookAt(eyeX,eyeY,eyeZ, 0,2,0, 0,1,0);
+	CGMatrix4x4 viewT = CGMatrix4x4::getTranslationMatrix(0.0f, -5.0, -25.0f);
+
+	drawGround(viewT);
+	for (int i = 10; i--;) {
+		float prX = float(i % 7) / 6.0f*16.0f - 8.0f, // [0,6]->[-8,+8]
+			prZ = float(i % 4) / 3.0f*16.0f - 8.0f; // [0,3]->[-8,+8]
+		CGMatrix4x4 treeT = viewT * CGMatrix4x4::getTranslationMatrix(prX, 0, prZ);
+		drawTree(treeT);
+	}
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));           //init random seed
+
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+
+	CG1Helper::setProgramStep(programStep_HappyHolidays);
 
 	CG1Helper::runApplication();
 
