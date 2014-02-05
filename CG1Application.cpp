@@ -77,6 +77,70 @@ void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
 #endif
 
 //---------------------------------------------------------------------------
+// Übung 09 - Aufgabe 2   |  Emmisiver, ambienter und diffuser Anteil
+//						  |  implementiert
+//---------------------------------------------------------------------------
+#if defined(U9)
+void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
+									CGVertexVaryings& out,
+									const CGUniformData& uniforms)
+{
+	// Get hold of all vertex attributes.
+	CGVec4 aPos = in.attributes[CG_POSITION_ATTRIBUTE];
+	CGVec4 aNrm = in.attributes[CG_NORMAL_ATTRIBUTE];
+	CGVec4 aClr = in.attributes[CG_COLOR_ATTRIBUTE];
+	CGVec4 aTex = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+
+	// Get hold of all vertex varyings.
+	CGVec4 &vPos = out.varyings[CG_POSITION_VARYING];
+	CGVec4 &vNrm = out.varyings[CG_NORMAL_VARYING];
+	CGVec4 &vClr = out.varyings[CG_COLOR_VARYING];
+	CGVec4 &vTex = out.varyings[CG_TEXCOORD_VARYING];
+
+	// Default program copies all attributes into all varyings used:
+	vPos = aPos; vNrm = aNrm; vClr = aClr; vTex = aTex;
+
+	// Transform from Object Space into Eye Space.
+	vPos = uniforms.modelviewMatrix * vPos;
+	vNrm = uniforms.normalMatrix * vNrm;
+
+	CGVec4 emis, ambi, diff, spec;
+	// TODO: for now, set them all to 0
+	emis.set(0.0f, 0.0f, 0.0f, 0.0f); ambi.set(0.0f, 0.0f, 0.0f, 0.0f);
+	diff.set(0.0f, 0.0f, 0.0f, 0.0f); spec.set(0.0f, 0.0f, 0.0f, 0.0f);
+
+	emis = uniforms.materialEmission;
+	ambi = CGMath::mul(uniforms.materialAmbient, uniforms.light0Ambient);
+
+	// L is vector direction from current point (vPos) to the light source (m_uniforms.light0Position)
+	CGVec4 L = CGMath::normalize(CGMath::sub(uniforms.light0Position, vPos));
+	// calculate dot product of nrm and L
+	float NdotL = CGMath::dot(vNrm, L);
+
+	if (NdotL > 0.0F) {
+		// diffuse
+		diff = CGMath::scale(CGMath::mul(uniforms.materialDiffuse, uniforms.light0Diffuse), NdotL);
+	}
+
+	// E is direction from current point (pos) to eye position
+	//CGVec4 E = ...
+	// H is half vector between L and E
+	//CGVec4 H = ...
+
+	// specular
+	//spec = ...
+
+	// sum up the final output color
+	vClr = CGMath::add(CGMath::add(CGMath::add(ambi, diff), spec), emis);
+	// clamp color values to range [0,1]
+	vClr = CGMath::clamp(vClr, 0, 1);
+
+	// Transform from Eye Space into Clip Space.
+	vPos = uniforms.projectionMatrix * vPos;
+}
+#endif
+
+//---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
 #if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(HA1)
