@@ -615,7 +615,7 @@ void programStep_CGUT()
 		CGMatrix4x4::getScaleMatrix(2, 2, 2);
 	modelviewT.getFloatsToColMajor(mv);
 	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
-	renderQuadric(cube); // ### Use this for debugging ###
+	renderQuadric(cylinder); // ### Use this for debugging ###
 	// and overlay the COS (disable and REenable the depth test)
 	ourContext->cgDisable(CG_DEPTH_TEST);
 	drawCoordSys(); // draw the COS defined by the MV-matrix
@@ -633,7 +633,7 @@ int main(int argc, char** argv)
 	cube.createBox();
 	cube2.setStandardColor(1, 0, 0, 1);
 	cube2.createBox(5, 5, 5);
-	//cylinder.createCylinder(15,5);
+	cylinder.createCylinder(15,5);
 	disk.setStandardColor(1, 1, 1, 1);
 	disk.createDisk(15, 2);
 	cone.setStandardColor(0, 0.5, 0, 1);
