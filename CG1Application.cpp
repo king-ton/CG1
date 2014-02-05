@@ -79,6 +79,7 @@ void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // Übung 09 - Aufgabe 2   |  Emmisiver, ambienter und diffuser Anteil
 //						  |  implementiert
+// Übung 09 - Aufgabe 3   |  Spekularer Anteil implementiert
 //---------------------------------------------------------------------------
 #if defined(U9)
 void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
@@ -102,7 +103,7 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 
 	// Transform from Object Space into Eye Space.
 	vPos = uniforms.modelviewMatrix * vPos;
-	vNrm = uniforms.normalMatrix * vNrm;
+	vNrm = CGMath::normalize(uniforms.normalMatrix * vNrm);
 
 	CGVec4 emis, ambi, diff, spec;
 	// TODO: for now, set them all to 0
@@ -120,20 +121,25 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 	if (NdotL > 0.0F) {
 		// diffuse
 		diff = CGMath::scale(CGMath::mul(uniforms.materialDiffuse, uniforms.light0Diffuse), NdotL);
+
+
+		// E is direction from current point (pos) to eye position
+		CGVec4 ePos; ePos.set(0.0f, 0.0f, 0.0f, 1.0f);
+		CGVec4 E = CGMath::normalize(CGMath::sub(ePos, vPos));
+		// H is half vector between L and E
+		CGVec4 H = CGMath::normalize(CGMath::add(L, E));
+
+		// specular
+		float NdotH = CGMath::dot(vNrm, H);
+
+		if (NdotH > 0.0F)
+			spec = CGMath::scale(CGMath::mul(uniforms.materialSpecular, uniforms.light0Specular), pow(NdotH, uniforms.materialShininess));
 	}
-
-	// E is direction from current point (pos) to eye position
-	//CGVec4 E = ...
-	// H is half vector between L and E
-	//CGVec4 H = ...
-
-	// specular
-	//spec = ...
-
 	// sum up the final output color
 	vClr = CGMath::add(CGMath::add(CGMath::add(ambi, diff), spec), emis);
 	// clamp color values to range [0,1]
 	vClr = CGMath::clamp(vClr, 0, 1);
+	vClr[A] = uniforms.materialDiffuse[A];
 
 	// Transform from Eye Space into Clip Space.
 	vPos = uniforms.projectionMatrix * vPos;
