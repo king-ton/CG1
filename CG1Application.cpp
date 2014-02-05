@@ -615,7 +615,7 @@ void programStep_CGUT()
 		CGMatrix4x4::getScaleMatrix(2, 2, 2);
 	modelviewT.getFloatsToColMajor(mv);
 	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
-	renderQuadric(disk); // ### Use this for debugging ###
+	renderQuadric(sphere2); // ### Use this for debugging ###
 	// and overlay the COS (disable and REenable the depth test)
 	ourContext->cgDisable(CG_DEPTH_TEST);
 	drawCoordSys(); // draw the COS defined by the MV-matrix

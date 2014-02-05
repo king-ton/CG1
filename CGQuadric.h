@@ -6,8 +6,8 @@
 // CGQuadric-Class
 // creates and holds polygonal (triangulated) discretizations
 // of objects which can be described through quadratic equations.
-//---------------------------------------------------------------------------
-
+//
+// Hausaufgabe 3 - Aufgabe 2.5.1  |  Methode subdivideTriangle
 //---------------------------------------------------------------------------
 class CGQuadric
 {
@@ -56,6 +56,12 @@ private:
 				   float x1, float y1, float z1, float nx1, float ny1, float nz1, 
 				   float x2, float y2, float z2, float nx2, float ny2, float nz2, 
 				   float x3, float y3, float z3, float nx3, float ny3, float nz3);
+
+	/// Subdive triangle into 4 smaller ones.
+	void m_subdivideTriangle(int subdiv,	float r,	float g,	float b,
+											float x0,	float y0,	float z0,
+											float x1,	float y1,	float z1,
+											float x2,	float y2,	float z2);
 
 	/// Internal pointers to data.
 	float *m_positions, *m_normals, *m_colors, *m_texcoords;
