@@ -552,6 +552,7 @@ void drawCoordSys()
 
 //---------------------------------------------------------------------------
 // Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+// Hausaufgabe 3 - Aufgabe 3    |  Ändere Vertex-Programm auf Knopf-Druck
 //---------------------------------------------------------------------------
 void programStep_CGUT()
 {
@@ -560,10 +561,16 @@ void programStep_CGUT()
 	ourContext->cgEnable(CG_DEPTH_TEST);
 	ourContext->cgEnable(CG_CULL_FACE);
 	ourContext->cgEnable(CG_BLEND);
-	ourContext->cgPolygonMode(CG_LINE); // ### Uncomment to check tessellesation ###
+	//ourContext->cgPolygonMode(CG_LINE); // ### Uncomment to check tessellesation ###
 
 	// ### Change to normalVertexProgram to visualize normal vectors ###
-	ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram);
+	static bool choice = false;
+	if (CG1Helper::isKeyReleased('c')) choice = !choice;
+
+	if (choice)
+		ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram);
+	else
+		ourContext->cgUseProgram(normalVertexProgram, passthroughFragmentProgram);
 
 	CGMatrix4x4 projMat;
 	projMat = CGMatrix4x4::getFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 50.0f);
@@ -615,10 +622,10 @@ void programStep_CGUT()
 		CGMatrix4x4::getScaleMatrix(2, 2, 2);
 	modelviewT.getFloatsToColMajor(mv);
 	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
-	renderQuadric(sphere2); // ### Use this for debugging ###
+	//renderQuadric(sphere2); // ### Use this for debugging ###
 	// and overlay the COS (disable and REenable the depth test)
 	ourContext->cgDisable(CG_DEPTH_TEST);
-	drawCoordSys(); // draw the COS defined by the MV-matrix
+	//drawCoordSys(); // draw the COS defined by the MV-matrix
 	ourContext->cgEnable(CG_DEPTH_TEST);
 }
 
