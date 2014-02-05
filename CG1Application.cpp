@@ -560,7 +560,7 @@ void programStep_CGUT()
 	ourContext->cgEnable(CG_DEPTH_TEST);
 	ourContext->cgEnable(CG_CULL_FACE);
 	ourContext->cgEnable(CG_BLEND);
-	//ourContext->cgPolygonMode(CG_LINE); // ### Uncomment to check tessellesation ###
+	ourContext->cgPolygonMode(CG_LINE); // ### Uncomment to check tessellesation ###
 
 	// ### Change to normalVertexProgram to visualize normal vectors ###
 	ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram);
