@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U9
+#define U10
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -81,7 +81,7 @@ void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
 //						  |  implementiert
 // Übung 09 - Aufgabe 3   |  Spekularer Anteil implementiert
 //---------------------------------------------------------------------------
-#if defined(U9)
+#if defined(U9) || defined(U10)
 void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 									CGVertexVaryings& out,
 									const CGUniformData& uniforms)
@@ -122,7 +122,6 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 		// diffuse
 		diff = CGMath::scale(CGMath::mul(uniforms.materialDiffuse, uniforms.light0Diffuse), NdotL);
 
-
 		// E is direction from current point (pos) to eye position
 		CGVec4 ePos; ePos.set(0.0f, 0.0f, 0.0f, 1.0f);
 		CGVec4 E = CGMath::normalize(CGMath::sub(ePos, vPos));
@@ -138,8 +137,8 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 	// sum up the final output color
 	vClr = CGMath::add(CGMath::add(CGMath::add(ambi, diff), spec), emis);
 	// clamp color values to range [0,1]
-	vClr = CGMath::clamp(vClr, 0, 1);
 	vClr[A] = uniforms.materialDiffuse[A];
+	vClr = CGMath::clamp(vClr, 0, 1);
 
 	// Transform from Eye Space into Clip Space.
 	vPos = uniforms.projectionMatrix * vPos;
@@ -147,9 +146,43 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 #endif
 
 //---------------------------------------------------------------------------
+// Übung 10 - Aufgabe 2   |  Funktion erstellt
+//---------------------------------------------------------------------------
+#if defined(U10)
+void perPixelLighingVertexProgram(	const CGVertexAttributes& in,
+									CGVertexVaryings& out,
+									const CGUniformData& uniforms)
+{
+	// Get hold of all vertex attributes.
+	CGVec4 aPos = in.attributes[CG_POSITION_ATTRIBUTE];
+	CGVec4 aNrm = in.attributes[CG_NORMAL_ATTRIBUTE];
+	CGVec4 aClr = in.attributes[CG_COLOR_ATTRIBUTE];
+	CGVec4 aTex = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+
+	// Get hold of all vertex varyings.
+	CGVec4 &vPos = out.varyings[CG_POSITION_VARYING];
+	CGVec4 &vNrm = out.varyings[CG_NORMAL_VARYING];
+	CGVec4 &vClr = out.varyings[CG_COLOR_VARYING];
+	CGVec4 &vTex = out.varyings[CG_TEXCOORD_VARYING];
+	CGVec4 &vPEs = out.varyings[CG_POSITION_EYESPACE_VARYING];
+
+	// Default program copies all attributes into all varyings used:
+	vPos = aPos; vNrm = aNrm; vClr = aClr; vTex = aTex;
+
+	// Transform from Object Space into Eye Space.
+	vPEs = uniforms.modelviewMatrix * aPos;
+	vNrm = uniforms.normalMatrix* vNrm;
+	CGMath::normalize(vNrm);
+
+	// Transform from Eye Space into Clip Space.
+	vPos = uniforms.projectionMatrix * vPEs;
+}
+#endif
+
+//---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(U10) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -161,13 +194,71 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 #endif
 
 //---------------------------------------------------------------------------
+// Übung 10 - Aufgabe 2   |  Funktion implementiert
+//---------------------------------------------------------------------------
+#if defined(U10)
+void perPixelLighingFragmentProgram(const CGFragmentData& in,
+	CGVec4& out,
+	const CGUniformData& uniforms)
+{
+	CGVec4 clr = in.varyings[CG_COLOR_VARYING];
+	CGVec4 nrm = in.varyings[CG_NORMAL_VARYING];
+	CGVec4 txc = in.varyings[CG_TEXCOORD_VARYING];
+	CGVec4 pos = in.varyings[CG_POSITION_EYESPACE_VARYING];
+
+	// renormalize the normal
+	nrm = CGMath::normalize(nrm);
+
+	// Compute Blinn-Phong reflection model.
+	CGVec4 emis, ambi, diff, spec;
+	emis.set(0.0f, 0.0f, 0.0f, 0.0f); ambi.set(0.0f, 0.0f, 0.0f, 0.0f);
+	diff.set(0.0f, 0.0f, 0.0f, 0.0f); spec.set(0.0f, 0.0f, 0.0f, 0.0f);
+	// emission
+	emis = uniforms.materialEmission;
+	// ambient
+	ambi = CGMath::mul(uniforms.materialAmbient, uniforms.light0Ambient);
+
+	// L is vector direction from current point (pos) to the light source (m_uniforms.light0Position)
+	CGVec4 L = CGMath::normalize(CGMath::sub(uniforms.light0Position, pos));
+	// calculate dot product of nrm and L
+	float NdotL = CGMath::dot(nrm, L);
+
+	if (NdotL>0)
+	{
+		// diffuse
+		diff = CGMath::scale(CGMath::mul(uniforms.materialDiffuse, uniforms.light0Diffuse), NdotL);
+
+		// E is direction from current point (pos) to eye position
+		CGVec4 ePos; ePos.set(0.0f, 0.0f, 0.0f, 1.0f);
+		CGVec4 E = CGMath::normalize(CGMath::sub(ePos, pos));
+		// H is half vector between L and E
+		CGVec4 H = CGMath::normalize(CGMath::add(L, E));
+
+		// specular
+		float NdotH = CGMath::dot(nrm, H);
+
+		if (NdotH > 0.0F)
+			spec = CGMath::scale(CGMath::mul(uniforms.materialSpecular, uniforms.light0Specular), pow(NdotH, uniforms.materialShininess));
+	}
+
+	// sum up the final output color
+	clr = CGMath::add(CGMath::add(CGMath::add(ambi, diff), spec), emis);
+	// Explicitly set alpha of the color
+	clr[A] = uniforms.materialDiffuse[A];
+	// clamp color values to range [0,1]
+	clr = CGMath::clamp(clr, 0, 1);
+	out = clr;
+}
+#endif
+
+//---------------------------------------------------------------------------
 // Erstellt die View-Matrix
 //
 // Übung 08 - Aufgabe 1a  |  Funktion erstellt
 // Übung 08 - Aufgabe 4a  |  Funktion implementiert
 // Übung 09 - Aufgabe 1   |  Refaktorisierung 
 //---------------------------------------------------------------------------
-#if defined(U8) || defined(U9)
+#if defined(U8) || defined(U9) || defined(U10)
 CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 	float centerX,	float centerY,	float centerZ,
 	float upX,		float upY,		float upZ)
@@ -1175,8 +1266,9 @@ int main(int argc, char** argv)
 
 //---------------------------------------------------------------------------
 // Übung 09  |  Beleuchtung I
+// Übung 10  |  Beleuchtung II
 //---------------------------------------------------------------------------
-#if defined(U9)
+#if defined(U9) || defined(U10)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
 #define FRAME_WIDTH  480	// Framebuffer width.
@@ -1195,6 +1287,7 @@ float shininess = 32.0f;
 
 //---------------------------------------------------------------------------
 // Übung 09 - Aufgabe 1   |  programStep erstellt
+// Übung 10 - Aufgabe 3   |  Vergleich der beiden Beleuchtungsmethoden
 //---------------------------------------------------------------------------
 void programStep_Lighting()
 {
@@ -1202,7 +1295,18 @@ void programStep_Lighting()
 	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
 	ourContext->cgEnable(CG_DEPTH_TEST);
 	ourContext->cgEnable(CG_CULL_FACE);
-	ourContext->cgUseProgram(perVertexLighingVertexProgram, passthroughFragmentProgram);
+
+#if defined(U10)
+	static bool choice = true;
+
+	if (CG1Helper::isKeyReleased('c')) choice = !choice;
+
+	if (!choice)
+		ourContext->cgUseProgram(perPixelLighingVertexProgram, perPixelLighingFragmentProgram);
+	else
+#endif
+		ourContext->cgUseProgram(perVertexLighingVertexProgram, passthroughFragmentProgram);
+
 	// set LIGHT properties (uniforms) with
 	// - low (white) ambient intensity (global diffuse lighting)
 	// - medium (white) diffuse and specular intensity
