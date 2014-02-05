@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U8
+#define U9
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -9,11 +9,15 @@
 
 //---------------------------------------------------------------------------
 // Hausaufgabe 1 - Aufgabe 2c  |  CGImageFile hinzugefügt
+// Übung 09      - Aufgabe 1   |  CGMath und CG1Application_renderSphere
+//							   |  hinzugefügt
 //---------------------------------------------------------------------------
 // Our includes.
 #include "CG1Helper.h"
 #include "CGContext.h"
 #include "CGImageFile.h"
+#include "CGMath.h"
+#include "CG1Application_renderSphere.h"
 
 //---------------------------------------------------------------------------
 // GLOBALE VARIABLEN
@@ -75,7 +79,7 @@ void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(HA1)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -83,6 +87,41 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 								const CGUniformData& uniforms)
 {
 	out = in.varyings[CG_COLOR_VARYING];
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Erstellt die View-Matrix
+//
+// Übung 08 - Aufgabe 1a  |  Funktion erstellt
+// Übung 08 - Aufgabe 4a  |  Funktion implementiert
+// Übung 09 - Aufgabe 1   |  Refaktorisierung 
+//---------------------------------------------------------------------------
+#if defined(U8) || defined(U9)
+CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
+	float centerX,	float centerY,	float centerZ,
+	float upX,		float upY,		float upZ)
+{
+	CGMatrix4x4 V;
+	CGVec4 f, s, u, up;
+
+	f.set(centerX - eyeX, centerY - eyeY, centerZ - eyeZ, 0.0F);
+	f = CGMath::normalize(f);
+
+	up.set(upX, upY, upZ, 0);
+	s = CGMath::normalize(CGMath::cross(f, up));
+
+	u = CGMath::cross(s, f);
+
+	f = CGMath::scale(f, -1);
+
+	float R[16] = { s[X],	s[Y],	s[Z],	0,
+					u[X],	u[Y],	u[Z],	0,
+					f[X],	f[Y],	f[Z],	0,
+					0,		0,		0,		1 };
+	V.setFloatsFromRowMajor(R);
+	V = V * CGMatrix4x4::getTranslationMatrix((-1)*eyeX, (-1)*eyeY, (-1)*eyeZ);
+	return V;
 }
 #endif
 
@@ -950,7 +989,7 @@ int main(int argc, char** argv)
 #if defined(U8)
 //---------------------------------------------------------------------------
 // Defines, globals, etc.
-#define FRAME_WIDTH  580	// Framebuffer width.
+#define FRAME_WIDTH 480	// Framebuffer width.
 #define FRAME_HEIGHT 320	// Framebuffer height.
 #define FRAME_SCALE  2		// Integer scaling factors (zoom).
 
@@ -1010,52 +1049,6 @@ void drawTree(CGMatrix4x4 transform)
 }
 
 //---------------------------------------------------------------------------
-// Erstellt die View-Matrix
-//
-// Übung 08 - Aufgabe 1a  |  Funktion erstellt
-// Übung 08 - Aufgabe 4a  |  Funktion implementiert
-//---------------------------------------------------------------------------
-CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
-						float centerX,	float centerY,	float centerZ,
-						float upX,		float upY,		float upZ)
-{
-	CGMatrix4x4 V;
-	float R[16];
-
-	R[8] = centerX - eyeX; R[9] = centerY - eyeY; R[10] = centerZ - eyeZ;
-	R[11] = 1 / sqrt(R[8] * R[8] + R[9] * R[9] + R[10] * R[10]);
-
-	R[8] = R[8] * R[11];R[9] = R[9] * R[11]; R[10] = R[10] * R[11];
-
-	R[0] = R[9] * upZ - R[10] * upY; R[1] = R[10] * upX - R[8] * upZ; R[2] = R[8] * upY - R[9] * upX;
-	R[3] = 1 / sqrt(R[0] * R[0] + R[1] * R[1] + R[2] * R[2]);
-
-	R[0] = R[0] * R[3];
-	R[1] = R[1] * R[3];
-	R[2] = R[2] * R[3];
-	R[3] = 0;
-
-	R[4] = R[1] * R[10] - R[2] * R[9];
-	R[5] = R[2] * R[8] - R[0] * R[10];
-	R[6] = R[0] * R[9] - R[1] * R[8];
-	R[7] = 0;
-
-	R[8] = R[8] * (-1);
-	R[9] = R[9] * (-1);
-	R[10] = R[10] * (-1);
-	R[11] = 0;
-
-	R[12] = 0;
-	R[13] = 0;
-	R[14] = 0;
-	R[15] = 1;
-
-	V.setFloatsFromRowMajor(R);
-	V = V * CGMatrix4x4::getTranslationMatrix((-1)*eyeX, (-1)*eyeY, (-1)*eyeZ);
-	return V;
-}
-
-//---------------------------------------------------------------------------
 // Übung 08 - Aufgabe 1a  |  Funktion erstellt
 //---------------------------------------------------------------------------
 CGMatrix4x4 cguPerspective(float fov_y, float aspect, float zNear, float zFar)
@@ -1108,4 +1101,97 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 09  |  Beleuchtung I
+//---------------------------------------------------------------------------
+#if defined(U9)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  480	// Framebuffer width.
+#define FRAME_HEIGHT 320	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Light and material properties, which will later be passed as uniforms.
+float	rgbaWhite10[4] = { 1, 1, 1, 1 },
+		rgbaWhite01[4] = { 0.1, 0.1, 0.1, 1.0 },
+		rgbaWhite05[4] = { 0.5, 0.5, 0.5, 1.0 },
+		rgbaGreen[4] = { 0, 1, 0, 1.0 },
+		rgbaRed[4] = { 1, 0, 0, 1 },
+		rgbaBlack[4] = { 0, 0, 0, 1 };
+float shininess = 32.0f;
+
+//---------------------------------------------------------------------------
+// Übung 09 - Aufgabe 1   |  programStep erstellt
+//---------------------------------------------------------------------------
+void programStep_Lighting()
+{
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgEnable(CG_CULL_FACE);
+	ourContext->cgUseProgram(perVertexLighingVertexProgram, passthroughFragmentProgram);
+	// set LIGHT properties (uniforms) with
+	// - low (white) ambient intensity (global diffuse lighting)
+	// - medium (white) diffuse and specular intensity
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_AMBIENT, 1, rgbaWhite01);
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_DIFFUSE, 1, rgbaWhite05);
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_SPECULAR, 1, rgbaWhite05);
+	// set MATERIAL properties (uniforms) with// - (red only) ambient and diffuse reflectance
+	// - (all channels) specular reflectance plus shininess
+	// - disable emission
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaRed);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaRed);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaWhite10);// TRY: rgbaGreen
+	ourContext->cgUniform1fv(CG_ULOC_MATERIAL_SHININESS, 1, &shininess);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaBlack); // TRY: rgbaWhite01
+	// set projection matrix
+	float proj[16];
+	CGMatrix4x4::getFrustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 50.0f).getFloatsToColMajor(proj);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
+	// set modelview matrix and normal matrix
+	float mv[16], nm[16];
+	CGMatrix4x4 viewT = cguLookAt(0, 2, 2.5, 0, 0, 0, 0, 1, 0);
+	CGMatrix4x4 modelT = CGMatrix4x4::getRotationMatrixY(40);
+	CGMatrix4x4 modelviewT = viewT*modelT;
+	modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	modelviewT.getFloatsToColMajor(nm); // Get normal matrix (column major!).
+	nm[12] = nm[13] = nm[14] = 0.0f; // Reduce to 3x3 matrix (column major!).
+	nm[3] = nm[7] = nm[11] = 0.0f;
+	nm[15] = 1.0f;
+	CGMatrix4x4 normalMatrix; normalMatrix.setFloatsFromColMajor(nm);
+	normalMatrix.invert(); normalMatrix.transpose();
+	normalMatrix.getFloatsToColMajor(nm); // Get the correct values of (MV.3x3)^-1^T
+	ourContext->cgUniformMatrix4fv(CG_ULOC_NORMAL_MATRIX, 1, false, nm);
+	renderTestSphere(ourContext, modelviewT, 1.0f);
+	// Specify light in Eye Space here
+	static float anim = 0.0f; anim += 0.01f;
+	CGVec4 lightPos; lightPos.set(cos(anim)*1.4, 1.4, sin(anim)*1.4, 1);
+	CGVec4 lightPosES = modelviewT*lightPos;
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_POSITION, 1, lightPosES.elements);
+	/// Visualize the light source smaller sphere
+	modelviewT = modelviewT*CGMatrix4x4::getTranslationMatrix(lightPos[0], lightPos[1], lightPos[2]);
+	modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaBlack);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaBlack);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaBlack);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaWhite10);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	renderTestSphere(ourContext, modelviewT, 0.05f);
+}
+
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0)); //init random seed
+	createTestSphere(3); //create sphere vertices
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+	CG1Helper::setProgramStep(programStep_Lighting);
+	CG1Helper::runApplication();
+	return 0;
+}
+//---------------------------------------------------------------------------
 #endif

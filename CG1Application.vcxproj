@@ -93,10 +93,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CG.h" />
+    <ClInclude Include="CG1Application_renderSphere.h" />
     <ClInclude Include="CG1Helper.h" />
     <ClInclude Include="CGContext.h" />
     <ClInclude Include="CGFrameBuffer.h" />
     <ClInclude Include="CGImageFile.h" />
+    <ClInclude Include="CGMath.h" />
     <ClInclude Include="CGMatrix.h" />
     <ClInclude Include="CGPrimClipper.h" />
     <ClInclude Include="CGProgramInterface.h" />
