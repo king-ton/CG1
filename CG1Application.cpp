@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U10
+#define HA3
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -8,9 +8,10 @@
 #include <time.h>           // for time() in srand()
 
 //---------------------------------------------------------------------------
-// Hausaufgabe 1 - Aufgabe 2c  |  CGImageFile hinzugefügt
-// Übung 09      - Aufgabe 1   |  CGMath und CG1Application_renderSphere
-//							   |  hinzugefügt
+// Hausaufgabe 1 - Aufgabe 2c   |  CGImageFile hinzugefügt
+// Übung 09      - Aufgabe 1    |  CGMath und CG1Application_renderSphere
+//							    |  hinzugefügt
+// Hausaufgabe 3 - Aufgabe 1.2  |
 //---------------------------------------------------------------------------
 // Our includes.
 #include "CG1Helper.h"
@@ -18,6 +19,7 @@
 #include "CGImageFile.h"
 #include "CGMath.h"
 #include "CG1Application_renderSphere.h"
+#include "CGQuadric.h"
 
 //---------------------------------------------------------------------------
 // GLOBALE VARIABLEN
@@ -63,7 +65,7 @@ void projectionVertexProgram(	const CGVertexAttributes& in,
 //						  |	 Vertex-Position mithilfe der ModelView-Matrix
 //						  |  und der Projections-Matrix
 //---------------------------------------------------------------------------
-#if defined(U8)
+#if defined(U8) || defined(HA3)
 void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
 	CGVertexVaryings& out,
 	const CGUniformData& uniforms)
@@ -182,7 +184,7 @@ void perPixelLighingVertexProgram(	const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(U10) || defined(HA1)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(U10) || defined(HA1) || defined(HA3)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -252,13 +254,39 @@ void perPixelLighingFragmentProgram(const CGFragmentData& in,
 #endif
 
 //---------------------------------------------------------------------------
+// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+#if defined(HA3)
+void normalVertexProgram(	const CGVertexAttributes& in,
+							CGVertexVaryings& out,
+							const CGUniformData& uniforms)
+{
+	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
+	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
+	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+
+	// Transform from Object Space into Eye Space.
+	out.varyings[CG_POSITION_VARYING] = uniforms.modelviewMatrix * out.varyings[CG_POSITION_VARYING];
+
+	// Transform from Eye Space into Clip Space.
+	out.varyings[CG_POSITION_VARYING] = uniforms.projectionMatrix * out.varyings[CG_POSITION_VARYING];
+
+	// Set normal as color, transformed into [0,1]-range
+	out.varyings[CG_COLOR_VARYING][R] = 0.5f * out.varyings[CG_NORMAL_VARYING][X] + 0.5f;
+	out.varyings[CG_COLOR_VARYING][G] = 0.5f * out.varyings[CG_NORMAL_VARYING][Y] + 0.5f;
+	out.varyings[CG_COLOR_VARYING][B] = 0.5f * out.varyings[CG_NORMAL_VARYING][Z] + 0.5f;
+	out.varyings[CG_COLOR_VARYING][A] = 1.0f;
+}
+#endif
+
+//---------------------------------------------------------------------------
 // Erstellt die View-Matrix
 //
 // Übung 08 - Aufgabe 1a  |  Funktion erstellt
 // Übung 08 - Aufgabe 4a  |  Funktion implementiert
 // Übung 09 - Aufgabe 1   |  Refaktorisierung 
 //---------------------------------------------------------------------------
-#if defined(U8) || defined(U9) || defined(U10)
+#if defined(U8) || defined(U9) || defined(U10) || defined(HA3)
 CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 	float centerX,	float centerY,	float centerZ,
 	float upX,		float upY,		float upZ)
@@ -476,6 +504,151 @@ int main(int argc, char** argv)
 
 	printf("Die Ergebnis-Matrizen wurde in Datei \"Ausgabe.txt\" geschrieben.\n");
 	system("PAUSE");
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 3  |  Quadriken
+//---------------------------------------------------------------------------
+#if defined(HA3)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  480	// Framebuffer width.
+#define FRAME_HEIGHT 320	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+CGQuadric podest, cube, cube2, cylinder, disk, cone, cone2, sphere, sphere2;
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void renderQuadric(CGQuadric &quadric)
+{
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, quadric.getPositionArray());
+	ourContext->cgVertexAttribPointer(CG_NORMAL_ATTRIBUTE, quadric.getNormalArray());
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, quadric.getColorArray());
+	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, quadric.getTexCoordArray());
+	ourContext->cgDrawArrays(GL_TRIANGLES, 0, quadric.getVertexCount());
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, NULL);
+	ourContext->cgVertexAttribPointer(CG_NORMAL_ATTRIBUTE, NULL);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, NULL);
+	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, NULL);
+}
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void drawCoordSys()
+{
+	static float vertices4axes[6*3] = { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1 };
+	static float colors4axes[6*4] = { 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1 };
+	ourContext->cgEnable(CG_USE_BRESENHAM);
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4axes);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4axes);
+	ourContext->cgDrawArrays(CG_LINES, 0, 6);
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, NULL);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, NULL);
+}
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void programStep_CGUT()
+{
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgEnable(CG_CULL_FACE);
+	ourContext->cgEnable(CG_BLEND);
+	//ourContext->cgPolygonMode(CG_LINE); // ### Uncomment to check tessellesation ###
+
+	// ### Change to normalVertexProgram to visualize normal vectors ###
+	ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram);
+
+	CGMatrix4x4 projMat;
+	projMat = CGMatrix4x4::getFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 50.0f);
+	float proj[16]; projMat.getFloatsToColMajor(proj);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
+	static float anim = 0.0f; anim += 0.01f;
+	float eyeX = cos(anim)*11.0f, eyeY = 11.0f, eyeZ = sin(anim)*11.0f;
+	//eyeX = 0; eyeY = 11; eyeZ = 11;
+	CGMatrix4x4 viewT = cguLookAt(eyeX, eyeY, eyeZ, 0, 0, 0, 0, 1, 0);
+	CGMatrix4x4 modelviewT;
+	float mv[16];
+
+	// SHOW ALL QUADRICS
+	for (int ix = -1; ix <= 1; ix++) { // 3 columns
+		for (int ih = -1; ih <= 1; ih += 2) { // 2 rows
+			// Cylinder as podium.
+			modelviewT = viewT * // left-most is the view transformation
+				CGMatrix4x4::getTranslationMatrix(ix*5.0f, 0, ih*5.0f) * // place on xz plane
+				CGMatrix4x4::getRotationMatrixX(-90); // rotate around X so that Z goes up
+			modelviewT.getFloatsToColMajor(mv);
+			ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+			renderQuadric(podest);
+			modelviewT = modelviewT*
+				CGMatrix4x4::getTranslationMatrix(0, 0, 1); // disk as cover (in the rotated COS of the cylinder!)
+			modelviewT.getFloatsToColMajor(mv);
+			ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+			renderQuadric(disk);
+
+			// The quadric object.
+			modelviewT = modelviewT *
+				CGMatrix4x4::getTranslationMatrix(0, 0, 1) * // the quadric (in the rotated COS of the cylinder!)
+				CGMatrix4x4::getScaleMatrix(0.5, 0.5, 0.5); // but scale down by 50%
+			modelviewT.getFloatsToColMajor(mv);
+			ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+			if (ih == -1) {
+				if (ix == -1) renderQuadric(sphere);
+				else if (ix == 0) renderQuadric(cone);
+				else if (ix == 1) renderQuadric(cube);
+			}
+			else {
+				if (ix == -1) renderQuadric(sphere2);
+				else if (ix == 0) renderQuadric(cube2);
+				else if (ix == 1) renderQuadric(cone2);
+			}
+		}
+	}
+	// SHOW A SINGLE QUADRIC
+	modelviewT = viewT * // reset to view only (model=identity)
+		CGMatrix4x4::getScaleMatrix(2, 2, 2);
+	modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	renderQuadric(cube); // ### Use this for debugging ###
+	// and overlay the COS (disable and REenable the depth test)
+	ourContext->cgDisable(CG_DEPTH_TEST);
+	drawCoordSys(); // draw the COS defined by the MV-matrix
+	ourContext->cgEnable(CG_DEPTH_TEST);
+}
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	podest.setStandardColor(1, 1, 1, 1);
+	podest.createCylinder(15, 1);
+	cube.setStandardColor(0.5, 0, 0, 1);
+	cube.createBox();
+	cube2.setStandardColor(1, 0, 0, 1);
+	cube2.createBox(5, 5, 5);
+	//cylinder.createCylinder(15,5);
+	disk.setStandardColor(1, 1, 1, 1);
+	disk.createDisk(15, 2);
+	cone.setStandardColor(0, 0.5, 0, 1);
+	cone.createCone(20, 5);
+	cone2.setStandardColor(0, 1, 0, 1);
+	cone2.createCone(0.5f, 20, 5);
+	sphere.setStandardColor(0, 0, 0.5, 1);
+	sphere.createUVSphere(10, 5);
+	sphere2.setStandardColor(0, 0, 1, 1);
+	sphere2.createIcoSphere(3);
+
+	CG1Helper::initApplication(ourContext, 640, 640);
+	CG1Helper::setProgramStep(programStep_CGUT);
+	CG1Helper::runApplication();
+	return 0;
 }
 #endif
 

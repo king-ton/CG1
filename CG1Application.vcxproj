@@ -102,6 +102,7 @@
     <ClInclude Include="CGMatrix.h" />
     <ClInclude Include="CGPrimClipper.h" />
     <ClInclude Include="CGProgramInterface.h" />
+    <ClInclude Include="CGQuadric.h" />
     <ClInclude Include="CGTexture.h" />
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +116,7 @@
     <ClCompile Include="CGImageFile.cpp" />
     <ClCompile Include="CGMatrix.cpp" />
     <ClCompile Include="CGPrimClipper.cpp" />
+    <ClCompile Include="CGQuadric.cpp" />
     <ClCompile Include="CGTexture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
