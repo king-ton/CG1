@@ -71,7 +71,10 @@ CGVec4 CGTexture2D::fetchTexel(int x, int y) const
 }
 
 //---------------------------------------------------------------------------
+// Gibt die Farbwerte an einer bestimmten Texel-Position zurück
+//
 // Übung 11 - Aufgabe 2c  |  Funktion implementiert für CG_NEAREST
+// Übung 11 - Aufgabe 4a  |  Funktion implementiert für CG_LINEAR
 //---------------------------------------------------------------------------
 CGVec4 CGTexture2D::sample(const CGVec4 &texcoord) const
 {
@@ -81,6 +84,23 @@ CGVec4 CGTexture2D::sample(const CGVec4 &texcoord) const
 		int x = texcoord.elements[0] * width;
 		int y = texcoord.elements[1] * height;
 		sample = fetchTexel(x, y);
+	}
+	else if (filterMode == CG_LINEAR) {
+		CGVec4 sample2[4];
+
+		int x0 = texcoord.elements[0] * width - 0.5F;
+		int y0 = texcoord.elements[1] * height - 0.5F;
+
+		sample2[0] = fetchTexel(x0,		y0);
+		sample2[1] = fetchTexel(x0 + 1,	y0);
+		sample2[2] = fetchTexel(x0,		y0 + 1);
+		sample2[3] = fetchTexel(x0 + 1,	y0 + 1);
+
+		float a = texcoord.elements[0] * width - 0.5F - x0;
+		float b = texcoord.elements[1] * height - 0.5F - y0;
+
+		for (int i = 0; i < 4; i++)
+			sample[i] = b * (a*sample2[3][i] + (1 - a) * sample2[2][i]) + (1 - b) * (a*sample2[1][i] + (1 - a) * sample2[0][i]);
 	}
 
 	return sample;
