@@ -1746,6 +1746,8 @@ void programStep_DataVisualization()
 	///------------------------------------------------------------------------
 	/// Übung 12 - Aufgabe 4a  |  Lade Bild auf Tastendruck
 	/// Übung 12 - Aufgabe 4b  |  Veränderung der einzelnen Quader auf Tastendruck
+	/// Übung 12 - Aufgabe 4d  |  Änderung der Kamera-, Licht und Beleuchtungsmodi
+	///						   |  auf Tastendruck
 	///---------------------------------------------------------------------------
 #pragma region Input handlers.
 	if (CG1Helper::isKeyReleased('1')) testdata.loadFromImage("Texture\\smiley.tga");
@@ -1753,6 +1755,10 @@ void programStep_DataVisualization()
 	if (CG1Helper::isKeyReleased('3')) testdata.loadFromImage("Texture\\hypnotoad.tga");
 
 	if (CG1Helper::isKeyPressed(32)) testdata.process();
+
+	if (CG1Helper::isKeyReleased('c')) global_CameraMode	= (global_CameraMode + 1) % 3;
+	if (CG1Helper::isKeyReleased('l')) global_LightMode		= (global_LightMode + 1) % 3;
+	if (CG1Helper::isKeyReleased('p')) global_LightingMode	= (global_LightingMode + 1) % 3;
 #pragma endregion
 
 #pragma region Per frame processed events (animations!) or other calculations.
