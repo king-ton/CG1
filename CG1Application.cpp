@@ -1820,6 +1820,8 @@ void programStep_DataVisualization()
 
 	///------------------------------------------------------------------------
 	/// Übung 12 - Aufgabe 3b  |  Schleife für alle TestDataItems erstellt
+	/// Übung 12 - Aufgabe 3c  |  Model-View-Matrix erstellt
+	/// Übung 12 - Aufgabe 3d  |  Diffuser Farbanteil wird gesetzt
 	///------------------------------------------------------------------------
 #pragma region Happy rendering.
 	for (int i = 0; i < testdata.size(); i++) {
@@ -1828,6 +1830,9 @@ void programStep_DataVisualization()
 		CGMatrix4x4 modelT =	CGMatrix4x4::getTranslationMatrix(item.x, item.y, item.z) *
 								CGMatrix4x4::getScaleMatrix(0.5F, 0.5F, 0.5F);
 		setModelViewMatrixUniform(viewT * modelT);
+
+		float rgba[4] = { item.r, item.g, item.b, 1.0F };
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgba);
 	}
 #pragma endregion
 }
