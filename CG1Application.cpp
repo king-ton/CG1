@@ -1752,6 +1752,7 @@ void programStep_DataVisualization()
 	/// Übung 12 - Aufgabe 4d  |  Änderung der Kamera-, Licht und Beleuchtungsmodi
 	///						   |  auf Tastendruck
 	/// Übung 12 - Aufgabe 4g  |  Rotation der Kamera
+	/// Übung 12 - Aufgabe 4h  |  Ausgabe des aktuellen Modi auf der Konsole
 	///---------------------------------------------------------------------------
 #pragma region Input handlers.
 	if (CG1Helper::isKeyReleased('1')) testdata.loadFromImage("Texture\\smiley.tga");
@@ -1760,9 +1761,18 @@ void programStep_DataVisualization()
 
 	if (CG1Helper::isKeyPressed(32)) testdata.process();
 
-	if (CG1Helper::isKeyReleased('c')) global_CameraMode = (global_CameraMode + 1) % 3;
-	if (CG1Helper::isKeyReleased('l')) global_LightMode = (global_LightMode + 1) % 3;
-	if (CG1Helper::isKeyReleased('p')) global_LightingMode = (global_LightingMode + 1) % 3;
+	if (CG1Helper::isKeyReleased('c')) {
+		global_CameraMode = (global_CameraMode + 1) % 3; 
+		printf("CameraMode: %i\n", global_CameraMode);
+	}
+	if (CG1Helper::isKeyReleased('l')) {
+		global_LightMode = (global_LightMode + 1) % 3; 
+		printf("LightMode: %i\n", global_LightMode);
+	}
+	if (CG1Helper::isKeyReleased('p')) {
+		global_LightingMode = (global_LightingMode + 1) % 3;
+		printf("LightingMode: %i\n", global_LightingMode);
+	}
 
 	if (CG1Helper::isKeyPressed(CG_KEY_UP)) global_CameraAnimation_X -= 1.0F;
 	if (CG1Helper::isKeyPressed(CG_KEY_DOWN)) global_CameraAnimation_X += 1.0F;
@@ -1845,9 +1855,6 @@ void programStep_DataVisualization()
 		CGMatrix4x4::getRotationMatrixY(global_CameraAnimation_Y) *
 		CGMatrix4x4::getRotationMatrixZ(global_CameraAnimation_Z) *
 		viewT;
-
-
-	// Aufgabe 4 (g): Rotate the camera position according to the global_CameraMode and global_CameraAnimation
 
 	viewT = CGMatrix4x4::getTranslationMatrix(0, 0, -20) * viewT;
 #pragma endregion
