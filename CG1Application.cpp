@@ -1710,8 +1710,10 @@ int main(int argc, char** argv)
 
 //------------------------------------------------------------------------
 // Übung 12 - Aufgabe 2a  |  Variable 'testdata' erstellt
+// Übung 12 - Aufgabe 3a  |  Variable 'cube' erstellt
 //---------------------------------------------------------------------------
 TestDataSet testdata;
+CGQuadric cube;
 
 //------------------------------------------------------------------------
 // Übung 12 - Aufgabe 2a  |  Funktion erstellt
@@ -1823,10 +1825,14 @@ void setModelViewMatrixUniform(CGMatrix4x4 modelview) {
 
 //---------------------------------------------------------------------------
 // Übung 12 - Aufgabe 1b  |  Funktion erstellt
+// Übung 12 - Aufgabe 2a  |  Erzeuge nicht unterteilte Box
 //---------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
 	srand(time(0)); //init random seed
+
+	cube.createBox();
+
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
 	CG1Helper::setProgramStep(programStep_DataVisualization);
 	CG1Helper::runApplication();
