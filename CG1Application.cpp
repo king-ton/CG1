@@ -1584,6 +1584,7 @@ int myTexture1;
 //---------------------------------------------------------------------------
 // Übung 11 - Aufgabe 1a  |  Funktion erstellt
 // Übung 11 - Aufgabe 2d  |  Ändere Wrap-Modi auf Tastendruck
+// Übung 11 - Aufgabe 4b  |  Ändere Filter-Modi auf Tastendruck
 //---------------------------------------------------------------------------
 void programStep_Texturing()
 {
@@ -1648,16 +1649,17 @@ void programStep_Texturing()
 	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4quad);
 
 	// 4b) use different texcoord array
-	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, texcoords4quad1);
+	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, texcoords4quad2);
 
 	// activate texture unit 0 with texture myTexture1: (sorry for the name)
 	// 2d)/4b) test different wrap modes/filters
-	static bool choice;
-	if (CG1Helper::isKeyReleased('c')) choice = !choice;
+	static bool cWrap, cFilter;
+	if (CG1Helper::isKeyReleased('w')) cWrap = !cWrap;
+	if (CG1Helper::isKeyReleased('f')) cFilter = !cFilter;
 
 	ourContext->cgActiveTexture_cgBindTexture_cgTexParameter(	0, myTexture1,
-																CGTexture2D::CG_NEAREST,
-																(choice ? CGTexture2D::CG_CLAMP : CGTexture2D::CG_REPEAT));
+																(cFilter ? CGTexture2D::CG_NEAREST : CGTexture2D::CG_LINEAR),
+																(cWrap ? CGTexture2D::CG_CLAMP : CGTexture2D::CG_REPEAT));
 	ourContext->cgUniform1i(CG_ULOC_SAMPLER, 0);
 	ourContext->cgDrawArrays(GL_TRIANGLES, 0, 2*3);
 
