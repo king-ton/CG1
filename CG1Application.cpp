@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define HA3
+#define U11
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -150,7 +150,7 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // Übung 10 - Aufgabe 2   |  Funktion erstellt
 //---------------------------------------------------------------------------
-#if defined(U10)
+#if defined(U10) || defined(U11)
 void perPixelLighingVertexProgram(	const CGVertexAttributes& in,
 									CGVertexVaryings& out,
 									const CGUniformData& uniforms)
@@ -198,7 +198,7 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 //---------------------------------------------------------------------------
 // Übung 10 - Aufgabe 2   |  Funktion implementiert
 //---------------------------------------------------------------------------
-#if defined(U10)
+#if defined(U10) || defined(U11)
 void perPixelLighingFragmentProgram(const CGFragmentData& in,
 	CGVec4& out,
 	const CGUniformData& uniforms)
@@ -286,7 +286,7 @@ void normalVertexProgram(	const CGVertexAttributes& in,
 // Übung 08 - Aufgabe 4a  |  Funktion implementiert
 // Übung 09 - Aufgabe 1   |  Refaktorisierung 
 //---------------------------------------------------------------------------
-#if defined(U8) || defined(U9) || defined(U10) || defined(HA3)
+#if defined(U8) || defined(U9) || defined(U10) || defined(U11) || defined(HA3)
 CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 	float centerX,	float centerY,	float centerZ,
 	float upX,		float upY,		float upZ)
@@ -311,6 +311,24 @@ CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 	V.setFloatsFromRowMajor(R);
 	V = V * CGMatrix4x4::getTranslationMatrix((-1)*eyeX, (-1)*eyeY, (-1)*eyeZ);
 	return V;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+#if defined(U11) || defined(HA3)
+void renderQuadric(CGQuadric &quadric)
+{
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, quadric.getPositionArray());
+	ourContext->cgVertexAttribPointer(CG_NORMAL_ATTRIBUTE, quadric.getNormalArray());
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, quadric.getColorArray());
+	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, quadric.getTexCoordArray());
+	ourContext->cgDrawArrays(GL_TRIANGLES, 0, quadric.getVertexCount());
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, NULL);
+	ourContext->cgVertexAttribPointer(CG_NORMAL_ATTRIBUTE, NULL);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, NULL);
+	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, NULL);
 }
 #endif
 
@@ -518,22 +536,6 @@ int main(int argc, char** argv)
 #define FRAME_SCALE  2		// Integer scaling factors (zoom).
 
 CGQuadric podest, cube, cube2, cylinder, disk, cone, cone2, sphere, sphere2;
-
-//---------------------------------------------------------------------------
-// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
-//---------------------------------------------------------------------------
-void renderQuadric(CGQuadric &quadric)
-{
-	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, quadric.getPositionArray());
-	ourContext->cgVertexAttribPointer(CG_NORMAL_ATTRIBUTE, quadric.getNormalArray());
-	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, quadric.getColorArray());
-	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, quadric.getTexCoordArray());
-	ourContext->cgDrawArrays(GL_TRIANGLES, 0, quadric.getVertexCount());
-	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, NULL);
-	ourContext->cgVertexAttribPointer(CG_NORMAL_ATTRIBUTE, NULL);
-	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, NULL);
-	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, NULL);
-}
 
 //---------------------------------------------------------------------------
 // Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
@@ -1544,6 +1546,138 @@ int main(int argc, char** argv)
 	createTestSphere(3); //create sphere vertices
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
 	CG1Helper::setProgramStep(programStep_Lighting);
+	CG1Helper::runApplication();
+	return 0;
+}
+//---------------------------------------------------------------------------
+#endif
+
+//---------------------------------------------------------------------------
+// Übung 11  |  Texturierung
+//---------------------------------------------------------------------------
+#if defined(U11)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  480	// Framebuffer width.
+#define FRAME_HEIGHT 320	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Light and material properties, which will later be passed as uniforms.
+float	rgbaWhite10[4] = { 1, 1, 1, 1 },
+		rgbaWhite01[4] = { 0.1, 0.1, 0.1, 1.0 },
+		rgbaWhite05[4] = { 0.5, 0.5, 0.5, 1.0 },
+		rgbaGreen[4] = { 0, 1, 0, 1.0 },
+		rgbaRed[4] = { 1, 0, 0, 1 },
+		rgbaBlack[4] = { 0, 0, 0, 1 };
+float shininess = 32.0f;
+
+CGQuadric sphere;
+int myTexture1;
+
+//---------------------------------------------------------------------------
+// Übung 11 - Aufgabe 1a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void programStep_Texturing()
+{
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgDisable(CG_CULL_FACE);
+	ourContext->cgUseProgram(perPixelLighingVertexProgram, perPixelLighingFragmentProgram);
+
+	// set LIGHT properties (uniforms) with
+	// - low (white) ambient intensity (global diffuse lighting)
+	// - medium (white) diffuse and specular intensity
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_AMBIENT, 1, rgbaWhite01);
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_DIFFUSE, 1, rgbaWhite05);
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_SPECULAR, 1, rgbaWhite05);
+
+	// Set any Light specified in Eye Space here: float lightPos[4] = {...};
+	// ourContext->cgUniform4fv(CG_ULOC_LIGHT0_POSITION,1,lightPos);
+	// set MATERIAL properties (uniforms) with
+	// - (green only) ambient and diffuse reflectance
+	// - (all channels) specular reflectance plus shininess
+	// - disable emission
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaWhite10);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaWhite10);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaWhite10);
+	ourContext->cgUniform1fv(CG_ULOC_MATERIAL_SHININESS, 1, &shininess);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaBlack);
+
+	// set projection matrix
+	float proj[16];
+	CGMatrix4x4::getFrustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 50.0f).getFloatsToColMajor(proj);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
+
+	// set modelview matrix and normal matrix
+	float mv[16], nm[16];
+	CGMatrix4x4 viewT = cguLookAt(0, 2, 2, 0, 0, 0, 0, 1, 0);
+	CGMatrix4x4 modelT = CGMatrix4x4::getRotationMatrixY(40);
+	CGMatrix4x4 modelviewT = viewT * modelT;
+	modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	modelviewT.getFloatsToColMajor(nm); // Get normal matrix (column major!).
+	nm[12] = nm[13] = nm[14] = 0.0f; // Reduce to 3x3 matrix (column major!).
+	nm[3] = nm[7] = nm[11] = 0.0f;
+	nm[15] = 1.0f;
+	CGMatrix4x4 normalMatrix; normalMatrix.setFloatsFromColMajor(nm);
+	normalMatrix.invert(); normalMatrix.transpose();
+	normalMatrix.getFloatsToColMajor(nm); // Get the correct values of (MV.3x3)^-1^T
+	ourContext->cgUniformMatrix4fv(CG_ULOC_NORMAL_MATRIX, 1, false, nm);
+
+	// Specify light in Object Space here: (because we want it relative to the object)
+	static float anim = 0.0f; anim += 0.01f;
+	CGVec4 lightPos; lightPos.set(cosf(anim)*1.4f, 1.4f, sinf(anim)*1.4f, 1);
+	CGVec4 lightPosES = modelviewT * lightPos;
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_POSITION, 1, lightPosES.elements);
+	float vertices4quad[6*3] = { -1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, 1 };
+	float normals4quad[6*3] = { 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0 };
+	float colors4quad[6*4] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	float texcoords4quad1[6*2] = { 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1 };
+	float texcoords4quad2[6*2] = { 0, 0, 0, 2, 2, 0, 2, 0, 0, 2, 2, 2 };
+	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, vertices4quad);
+	ourContext->cgVertexAttribPointer(CG_NORMAL_ATTRIBUTE, normals4quad);
+	ourContext->cgVertexAttribPointer(CG_COLOR_ATTRIBUTE, colors4quad);
+
+	// 4b) use different texcoord array
+	ourContext->cgVertexAttribPointer(CG_TEXCOORD_ATTRIBUTE, texcoords4quad1);
+
+	// activate texture unit 0 with texture myTexture1: (sorry for the name)
+	// 2d)/4b) test different wrap modes/filters
+	ourContext->cgActiveTexture_cgBindTexture_cgTexParameter(	0, myTexture1,
+																CGTexture2D::CG_NEAREST,
+																CGTexture2D::CG_CLAMP);
+	ourContext->cgUniform1i(CG_ULOC_SAMPLER, 0);
+	ourContext->cgDrawArrays(GL_TRIANGLES, 0, 2*3);
+
+	// deactivate texture unit 0 by binding negative texture name
+	ourContext->cgActiveTexture_cgBindTexture_cgTexParameter(	0, -1,
+																CGTexture2D::CG_NEAREST,
+																CGTexture2D::CG_CLAMP);
+	
+	/// Visualize the light source smaller sphere
+	modelviewT = modelviewT*CGMatrix4x4::getTranslationMatrix(lightPos[0], lightPos[1], lightPos[2]);
+	modelviewT = modelviewT*CGMatrix4x4::getScaleMatrix(0.05f, 0.05f, 0.05f);
+	modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaWhite05);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	renderQuadric(sphere);
+}
+
+//---------------------------------------------------------------------------
+// Übung 11 - Aufgabe 1a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	sphere.setStandardColor(1, 1, 1, 1);
+	sphere.createUVSphere(10, 10);
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+	CG1Helper::setProgramStep(programStep_Texturing);
+	// create textures just once:
+	int imgWidth, imgHeight;
+	unsigned char* imgData4ub = cgImageLoad("checker.tga", &imgWidth, &imgHeight);
+	myTexture1 = ourContext->cgGenTexture_cgBindTexture_cgTexImage2D(imgWidth, imgHeight, imgData4ub);
 	CG1Helper::runApplication();
 	return 0;
 }
