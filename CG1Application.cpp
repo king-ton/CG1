@@ -1716,6 +1716,23 @@ TestDataSet testdata;
 CGQuadric cube;
 
 //------------------------------------------------------------------------
+// Pass matrix as modelview to pipeline and update normal matrix.
+//
+// Übung 12 - Aufgabe 1c  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void setModelViewMatrixUniform(CGMatrix4x4 modelview) {
+	float mv[16]; modelview.getFloatsToColMajor(mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	// Build and set normalmatrix:
+	float nm[16]; modelview.getFloatsToColMajor(nm);
+	nm[12] = nm[13] = nm[14] = nm[3] = nm[7] = nm[11] = 0.0f; nm[15] = 1.0f;
+	CGMatrix4x4 normalMatrix; normalMatrix.setFloatsFromColMajor(nm);
+	normalMatrix.invert(); normalMatrix.transpose();
+	normalMatrix.getFloatsToColMajor(nm);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_NORMAL_MATRIX, 1, false, nm);
+}
+
+//------------------------------------------------------------------------
 // Übung 12 - Aufgabe 2a  |  Funktion erstellt
 //---------------------------------------------------------------------------
 void programStep_DataVisualization()
@@ -1807,25 +1824,12 @@ void programStep_DataVisualization()
 #pragma region Happy rendering.
 	for (int i = 0; i < testdata.size(); i++) {
 		TestDataSet::TestDataItem item = testdata.get(i);
+
+		CGMatrix4x4 modelT =	CGMatrix4x4::getTranslationMatrix(item.x, item.y, item.z) *
+								CGMatrix4x4::getScaleMatrix(0.5F, 0.5F, 0.5F);
+		setModelViewMatrixUniform(viewT * modelT);
 	}
 #pragma endregion
-}
-
-//------------------------------------------------------------------------
-// Pass matrix as modelview to pipeline and update normal matrix.
-//
-// Übung 12 - Aufgabe 1c  |  Funktion erstellt
-//---------------------------------------------------------------------------
-void setModelViewMatrixUniform(CGMatrix4x4 modelview) {
-	float mv[16]; modelview.getFloatsToColMajor(mv);
-	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
-	// Build and set normalmatrix:
-	float nm[16]; modelview.getFloatsToColMajor(nm);
-	nm[12] = nm[13] = nm[14] = nm[3] = nm[7] = nm[11] = 0.0f; nm[15] = 1.0f;
-	CGMatrix4x4 normalMatrix; normalMatrix.setFloatsFromColMajor(nm);
-	normalMatrix.invert(); normalMatrix.transpose();
-	normalMatrix.getFloatsToColMajor(nm);
-	ourContext->cgUniformMatrix4fv(CG_ULOC_NORMAL_MATRIX, 1, false, nm);
 }
 
 //---------------------------------------------------------------------------
