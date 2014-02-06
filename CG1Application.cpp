@@ -1739,11 +1739,14 @@ void programStep_DataVisualization()
 {
 	///------------------------------------------------------------------------
 	/// Übung 12 - Aufgabe 4a  |  Lade Bild auf Tastendruck
+	/// Übung 12 - Aufgabe 4b  |  Veränderung der einzelnen Quader auf Tastendruck
 	///---------------------------------------------------------------------------
 #pragma region Input handlers.
 	if (CG1Helper::isKeyReleased('1')) testdata.loadFromImage("Texture\\smiley.tga");
 	if (CG1Helper::isKeyReleased('2')) testdata.loadFromImage("Texture\\text.tga");
 	if (CG1Helper::isKeyReleased('3')) testdata.loadFromImage("Texture\\hypnotoad.tga");
+
+	if (CG1Helper::isKeyPressed(32)) testdata.process();
 #pragma endregion
 
 #pragma region Per frame processed events (animations!) or other calculations.
