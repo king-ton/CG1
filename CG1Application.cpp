@@ -325,7 +325,7 @@ CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 //---------------------------------------------------------------------------
 // Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
 //---------------------------------------------------------------------------
-#if defined(U11) || defined(HA3)
+#if defined(U11) || defined(U12) || defined(HA3)
 void renderQuadric(CGQuadric &quadric)
 {
 	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, quadric.getPositionArray());
@@ -1822,6 +1822,7 @@ void programStep_DataVisualization()
 	/// Übung 12 - Aufgabe 3b  |  Schleife für alle TestDataItems erstellt
 	/// Übung 12 - Aufgabe 3c  |  Model-View-Matrix erstellt
 	/// Übung 12 - Aufgabe 3d  |  Diffuser Farbanteil wird gesetzt
+	/// Übung 12 - Aufgabe 3e  |  Zeichne 'cube'
 	///------------------------------------------------------------------------
 #pragma region Happy rendering.
 	for (int i = 0; i < testdata.size(); i++) {
@@ -1833,6 +1834,8 @@ void programStep_DataVisualization()
 
 		float rgba[4] = { item.r, item.g, item.b, 1.0F };
 		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgba);
+
+		renderQuadric(cube);
 	}
 #pragma endregion
 }
