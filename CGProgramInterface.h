@@ -73,22 +73,33 @@ struct CGFragmentData
 
 	//---------------------------------------------------------------------------
 	// Übung 03 - Aufgabe 1b  |  Interpolation implementiert
+	// Übung 11 - Aufgabe 3a  |  Perspektivisch korrekte Interpolation
 	//---------------------------------------------------------------------------
 	void set(const CGVertexVaryings& A, const CGVertexVaryings& B, float ratio)
 	{
+		float wa = A.varyings[CG_POSITION_VARYING][W];
+		float wb = B.varyings[CG_POSITION_VARYING][W];
+
+		float a = (1.0F - ratio), b = ratio;
+
 		for (int i = 0; i < CG_VARYING_COUNT; ++i)
 			for (int j = 0; j < 4; ++j)
-				varyings[i][j] = (1.0F - ratio) * A.varyings[i][j] + ratio * B.varyings[i][j];
+				varyings[i][j] = (a * wa * A.varyings[i][j] + b * wb * B.varyings[i][j]) / (a * wa + b * wb);
 	}
 
 	//---------------------------------------------------------------------------
 	// Übung 04 - Aufgabe 2a  |  Interpolation implementiert
+	// Übung 11 - Aufgabe 3a  |  Perspektivisch korrekte Interpolation
 	//---------------------------------------------------------------------------
 	void set(const CGVertexVaryings& A, const CGVertexVaryings& B, const CGVertexVaryings& C, float a, float b, float c)
 	{
+		float wa = A.varyings[CG_POSITION_VARYING][W];
+		float wb = B.varyings[CG_POSITION_VARYING][W];
+		float wc = C.varyings[CG_POSITION_VARYING][W];
+
 		for (int i = 0; i < CG_VARYING_COUNT; ++i)
-		for (int j = 0; j < 4; ++j)
-			varyings[i][j] = a * A.varyings[i][j] + b * B.varyings[i][j] + c * C.varyings[i][j];
+			for (int j = 0; j < 4; ++j) 
+				varyings[i][j] = (a * wa * A.varyings[i][j] + b * wb * B.varyings[i][j] + c * wc * C.varyings[i][j]) / (a * wa + b * wb + c * wc);
 	}
 };
 
