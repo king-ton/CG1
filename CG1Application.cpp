@@ -1709,6 +1709,11 @@ int main(int argc, char** argv)
 #define FRAME_SCALE  2		// Integer scaling factors (zoom).
 
 //------------------------------------------------------------------------
+// Übung 12 - Aufgabe 2a  |  Variable 'testdata' erstellt
+//---------------------------------------------------------------------------
+TestDataSet testdata;
+
+//------------------------------------------------------------------------
 // Pass matrix as modelview to pipeline and update normal matrix.
 //
 // Übung 12 - Aufgabe 1c  |  Funktion erstellt
