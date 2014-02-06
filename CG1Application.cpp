@@ -1801,8 +1801,13 @@ void programStep_DataVisualization()
 	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_POSITION, 1, lightPosES.elements);
 #pragma endregion
 
+	///------------------------------------------------------------------------
+	/// Übung 12 - Aufgabe 3b  |  Schleife für alle TestDataItems erstellt
+	///------------------------------------------------------------------------
 #pragma region Happy rendering.
-	// Aufgabe 3
+	for (int i = 0; i < testdata.size(); i++) {
+		TestDataSet::TestDataItem item = testdata.get(i);
+	}
 #pragma endregion
 }
 
@@ -1825,7 +1830,7 @@ void setModelViewMatrixUniform(CGMatrix4x4 modelview) {
 
 //---------------------------------------------------------------------------
 // Übung 12 - Aufgabe 1b  |  Funktion erstellt
-// Übung 12 - Aufgabe 2a  |  Erzeuge nicht unterteilte Box
+// Übung 12 - Aufgabe 3a  |  Erzeuge nicht unterteilte Box
 //---------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
