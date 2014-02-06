@@ -67,7 +67,7 @@ void projectionVertexProgram(	const CGVertexAttributes& in,
 //						  |	 Vertex-Position mithilfe der ModelView-Matrix
 //						  |  und der Projections-Matrix
 //---------------------------------------------------------------------------
-#if defined(U8) || defined(HA3)
+#if defined(U8) || defined(U12) || defined(HA3)
 void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
 	CGVertexVaryings& out,
 	const CGUniformData& uniforms)
@@ -85,7 +85,7 @@ void modelViewProjectionVertexProgram(const CGVertexAttributes& in,
 //						  |  implementiert
 // Übung 09 - Aufgabe 3   |  Spekularer Anteil implementiert
 //---------------------------------------------------------------------------
-#if defined(U9) || defined(U10)
+#if defined(U9) || defined(U10) || defined(U12)
 void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 									CGVertexVaryings& out,
 									const CGUniformData& uniforms)
@@ -186,7 +186,7 @@ void perPixelLighingVertexProgram(	const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // FRAGMENT PROGRAMME
 //---------------------------------------------------------------------------
-#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(U10) || defined(HA1) || defined(HA3)
+#if defined(U1) || defined(U2) || defined(U3_1) || defined(U3_2) || defined(U3_3) || defined(U4) || defined(U5) || defined(U6) || defined(U6_4) || defined(U7) || defined(U8) || defined(U9) || defined(U10) || defined(U12) || defined(HA1) || defined(HA3)
 //---------------------------------------------------------------------------
 // generic "passthorugh" fragment program
 void passthroughFragmentProgram(const CGFragmentData& in,
@@ -1756,9 +1756,9 @@ void programStep_DataVisualization()
 
 	if (CG1Helper::isKeyPressed(32)) testdata.process();
 
-	if (CG1Helper::isKeyReleased('c')) global_CameraMode	= (global_CameraMode + 1) % 3;
-	if (CG1Helper::isKeyReleased('l')) global_LightMode		= (global_LightMode + 1) % 3;
-	if (CG1Helper::isKeyReleased('p')) global_LightingMode	= (global_LightingMode + 1) % 3;
+	if (CG1Helper::isKeyReleased('c')) global_CameraMode = (global_CameraMode + 1) % 3;
+	if (CG1Helper::isKeyReleased('l')) global_LightMode = (global_LightMode + 1) % 3;
+	if (CG1Helper::isKeyReleased('p')) global_LightingMode = (global_LightingMode + 1) % 3;
 #pragma endregion
 
 #pragma region Per frame processed events (animations!) or other calculations.
@@ -1768,6 +1768,9 @@ void programStep_DataVisualization()
 	float dataCenter[3] = { testdata.maxX() / 2, testdata.maxY() / 2, testdata.maxZ() / 2 };
 #pragma endregion
 
+	///------------------------------------------------------------------------
+	/// Übung 12 - Aufgabe 4e  |  Änderung der Beleuchtungsmodi auf Tastendruck
+	///------------------------------------------------------------------------
 #pragma region CG (GL) Setup.
 	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
@@ -1776,7 +1779,11 @@ void programStep_DataVisualization()
 	ourContext->cgEnable(CG_DEPTH_TEST); // We need depth testing.
 	ourContext->cgEnable(CG_CULL_FACE); // We don’t need back faces.
 	// We want lights and per fragment lighting.
-	ourContext->cgUseProgram(perPixelLighingVertexProgram, perPixelLighingFragmentProgram);
+	switch (global_LightingMode) {
+		case 0: ourContext->cgUseProgram(perPixelLighingVertexProgram, perPixelLighingFragmentProgram); break;
+		case 1: ourContext->cgUseProgram(perVertexLighingVertexProgram, passthroughFragmentProgram); break;
+		case 2: ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram); break;
+	}
 	// Aufgabe 4 (e): Set LIGHTING mode according to the global_LightingMode
 #pragma endregion
 
