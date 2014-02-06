@@ -11,7 +11,8 @@
 // Hausaufgabe 1 - Aufgabe 2c   |  CGImageFile hinzugefügt
 // Übung 09      - Aufgabe 1    |  CGMath und CG1Application_renderSphere
 //							    |  hinzugefügt
-// Hausaufgabe 3 - Aufgabe 1.2  |
+// Hausaufgabe 3 - Aufgabe 1.2  |  CGQuadric hinzugefügt
+// Übung 12      - Aufgabe 1a   |  TestDataSet hinzugefügt
 //---------------------------------------------------------------------------
 // Our includes.
 #include "CG1Helper.h"
@@ -20,6 +21,7 @@
 #include "CGMath.h"
 #include "CG1Application_renderSphere.h"
 #include "CGQuadric.h"
+#include "TestDataSet.h"
 
 //---------------------------------------------------------------------------
 // GLOBALE VARIABLEN
