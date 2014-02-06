@@ -1784,7 +1784,6 @@ void programStep_DataVisualization()
 		case 1: ourContext->cgUseProgram(perVertexLighingVertexProgram, passthroughFragmentProgram); break;
 		case 2: ourContext->cgUseProgram(modelViewProjectionVertexProgram, passthroughFragmentProgram); break;
 	}
-	// Aufgabe 4 (e): Set LIGHTING mode according to the global_LightingMode
 #pragma endregion
 
 #pragma region Light and material properties.
@@ -1829,11 +1828,21 @@ void programStep_DataVisualization()
 	viewT = CGMatrix4x4::getTranslationMatrix(0, 0, -20) * viewT;
 #pragma endregion
 
+	///------------------------------------------------------------------------
+	/// Übung 12 - Aufgabe 4f  |  Änderung der Lichtmodi auf Tastendruck
+	///------------------------------------------------------------------------
 #pragma region Light position setup.
 	CGVec4 lightPos; // Light position in object space (using same coordinate frame as data).
-	lightPos.set(testdata.maxX() / 2, testdata.maxY() / 2, testdata.maxZ() * 2, 1);
-
-	// Aufgabe 4 (f): Set light position according to the global_LightMode and global_LightAnimation
+	
+	switch (global_LightMode) {
+		case 0: lightPos.set(testdata.maxX() / 2, testdata.maxY() / 2, testdata.maxZ() * 2, 1); break;
+		default: 
+			global_LightAnimation += 1.0F;
+			lightPos.set(testdata.maxX() / 2, testdata.maxY() / 2, testdata.maxZ() * 2, 1);
+			lightPos = CGMatrix4x4::getRotationMatrixY(global_LightAnimation) * lightPos;
+			break;
+		case 2: lightPos.set(testdata.maxX() / 2, testdata.maxY() / 2, testdata.maxZ() * 2, 1); break;
+	}
 
 	// BUT the pipeline needs the eye space light position!
 	// Moving from scene object space to eye space using ModelView matrix
