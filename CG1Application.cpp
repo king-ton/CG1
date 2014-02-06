@@ -1667,6 +1667,7 @@ void programStep_Texturing()
 
 //---------------------------------------------------------------------------
 // Übung 11 - Aufgabe 1a  |  Funktion erstellt
+// Übung 11 - Aufgabe 1c  |  Pfad der Textur geändert
 //---------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
@@ -1676,7 +1677,7 @@ int main(int argc, char** argv)
 	CG1Helper::setProgramStep(programStep_Texturing);
 	// create textures just once:
 	int imgWidth, imgHeight;
-	unsigned char* imgData4ub = cgImageLoad("checker.tga", &imgWidth, &imgHeight);
+	unsigned char* imgData4ub = cgImageLoad("Texture\\checker.tga", &imgWidth, &imgHeight);
 	myTexture1 = ourContext->cgGenTexture_cgBindTexture_cgTexImage2D(imgWidth, imgHeight, imgData4ub);
 	CG1Helper::runApplication();
 	return 0;
