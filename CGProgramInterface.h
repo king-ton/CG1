@@ -6,6 +6,8 @@
 #include "CGTexture.h"
 
 //---------------------------------------------------------------------------
+// Hausaufgabe 4 - Aufgabe 1.1a  |  Hinzufügen neuer Locations
+//---------------------------------------------------------------------------
 
 /// Locations to access the builtin Uniforms
 enum CGUniformLocations
@@ -18,10 +20,17 @@ enum CGUniformLocations
 	CG_ULOC_MATERIAL_SPECULAR,
 	CG_ULOC_MATERIAL_SHININESS,
 	CG_ULOC_MATERIAL_EMISSION,
+	CG_ULOC_SCENE_AMBIENT,
 	CG_ULOC_LIGHT0_AMBIENT,
 	CG_ULOC_LIGHT0_DIFFUSE,
 	CG_ULOC_LIGHT0_SPECULAR,
 	CG_ULOC_LIGHT0_POSITION,
+	CG_ULOC_LIGHT0_CONSTANT_ATTENUATION,
+	CG_ULOC_LIGHT0_LINEAR_ATTENUATION,
+	CG_ULOC_LIGHT0_QUADRATIC_ATTENUATION,
+	CG_ULOC_LIGHT0_SPOT_DIRECTION,
+	CG_ULOC_LIGHT0_SPOT_EXPONENT,
+	CG_ULOC_LIGHT0_SPOT_CUTOFF,
 	CG_ULOC_SAMPLER
 };
 
