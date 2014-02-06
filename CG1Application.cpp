@@ -1712,14 +1712,17 @@ int main(int argc, char** argv)
 // Übung 12 - Aufgabe 2a  |  Variable 'testdata' erstellt
 // Übung 12 - Aufgabe 3a  |  Variable 'cube' erstellt
 // Übung 12 - Aufgabe 4c  |  Variablen für Interaktion erstellt
+// Übung 12 - Aufgabe 4f  |  Variablen für Rotation um Achsen hinzugefügt
 //---------------------------------------------------------------------------
 TestDataSet testdata;
 CGQuadric cube;
-int		global_CameraMode		= 0; // We will hardcode three positions.
-float	global_CameraAnimation	= 0; // Camera animation parameter.
-int		global_LightMode		= 0; // We will hardcode three light positions.
-float	global_LightAnimation	= 0; // Light animation parameter.
-int		global_LightingMode		= 0; // LightING mode (per-Pixel/per-Vertex/none).
+int		global_CameraMode			= 0; // We will hardcode three positions.
+float	global_CameraAnimation_X	= 0; // Camera animation parameter.
+float	global_CameraAnimation_Y	= 0; // Camera animation parameter.
+float	global_CameraAnimation_Z	= 0; // Camera animation parameter.
+int		global_LightMode			= 0; // We will hardcode three light positions.
+float	global_LightAnimation		= 0; // Light animation parameter.
+int		global_LightingMode			= 0; // LightING mode (per-Pixel/per-Vertex/none).
 
 //------------------------------------------------------------------------
 // Pass matrix as modelview to pipeline and update normal matrix.
@@ -1748,6 +1751,7 @@ void programStep_DataVisualization()
 	/// Übung 12 - Aufgabe 4b  |  Veränderung der einzelnen Quader auf Tastendruck
 	/// Übung 12 - Aufgabe 4d  |  Änderung der Kamera-, Licht und Beleuchtungsmodi
 	///						   |  auf Tastendruck
+	/// Übung 12 - Aufgabe 4g  |  Rotation der Kamera
 	///---------------------------------------------------------------------------
 #pragma region Input handlers.
 	if (CG1Helper::isKeyReleased('1')) testdata.loadFromImage("Texture\\smiley.tga");
@@ -1759,6 +1763,11 @@ void programStep_DataVisualization()
 	if (CG1Helper::isKeyReleased('c')) global_CameraMode = (global_CameraMode + 1) % 3;
 	if (CG1Helper::isKeyReleased('l')) global_LightMode = (global_LightMode + 1) % 3;
 	if (CG1Helper::isKeyReleased('p')) global_LightingMode = (global_LightingMode + 1) % 3;
+
+	if (CG1Helper::isKeyPressed(CG_KEY_UP)) global_CameraAnimation_X -= 1.0F;
+	if (CG1Helper::isKeyPressed(CG_KEY_DOWN)) global_CameraAnimation_X += 1.0F;
+	if (CG1Helper::isKeyPressed(CG_KEY_LEFT)) global_CameraAnimation_Y -= 1.0F;
+	if (CG1Helper::isKeyPressed(CG_KEY_RIGHT)) global_CameraAnimation_Y += 1.0F;
 #pragma endregion
 
 #pragma region Per frame processed events (animations!) or other calculations.
@@ -1816,12 +1825,27 @@ void programStep_DataVisualization()
 	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
 #pragma endregion
 
+	///------------------------------------------------------------------------
+	/// Übung 12 - Aufgabe 4g  |  Rotation der Kamera
+	///------------------------------------------------------------------------
 #pragma region View (camera) setup.
 	CGMatrix4x4 viewT; // Set camera by creating the ’view’-part of the modelview-matrix.
 	// Moving the camera is the same as moving the scene inverse.
 	// So center the scene and push it away from the camera (using two transformations).
 	// You can also use cgLookAt() here (but don’t right now).
 	viewT = CGMatrix4x4::getTranslationMatrix(-dataCenter[0], -dataCenter[1], -dataCenter[2]);
+
+	switch (global_CameraMode) {
+		case 0:																		global_CameraAnimation_Z = 0;		break;
+		case 1: global_CameraAnimation_X = 0;	global_CameraAnimation_Y = 0;		global_CameraAnimation_Z += 1.0F;	break;
+		case 2: global_CameraAnimation_X = 0;	global_CameraAnimation_Y += 1.0F;	global_CameraAnimation_Z = 0;		break;
+	}
+
+	viewT = CGMatrix4x4::getRotationMatrixX(global_CameraAnimation_X) *
+		CGMatrix4x4::getRotationMatrixY(global_CameraAnimation_Y) *
+		CGMatrix4x4::getRotationMatrixZ(global_CameraAnimation_Z) *
+		viewT;
+
 
 	// Aufgabe 4 (g): Rotate the camera position according to the global_CameraMode and global_CameraAnimation
 
