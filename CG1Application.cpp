@@ -197,6 +197,7 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 
 //---------------------------------------------------------------------------
 // Übung 10 - Aufgabe 2   |  Funktion implementiert
+// Übung 11 - Aufgabe 2e  |  Textur-Eigenschaften werden berücksichtigt
 //---------------------------------------------------------------------------
 #if defined(U10) || defined(U11)
 void perPixelLighingFragmentProgram(const CGFragmentData& in,
@@ -245,6 +246,11 @@ void perPixelLighingFragmentProgram(const CGFragmentData& in,
 
 	// sum up the final output color
 	clr = CGMath::add(CGMath::add(CGMath::add(ambi, diff), spec), emis);
+
+	// Berücksichtigung der Textur-eigenschaften
+	if (uniforms.sampler.texture != NULL)
+		clr = CGMath::mul(clr, uniforms.sampler.texture->sample(txc));
+
 	// Explicitly set alpha of the color
 	clr[A] = uniforms.materialDiffuse[A];
 	// clamp color values to range [0,1]
@@ -1577,6 +1583,7 @@ int myTexture1;
 
 //---------------------------------------------------------------------------
 // Übung 11 - Aufgabe 1a  |  Funktion erstellt
+// Übung 11 - Aufgabe 2d  |  Ändere Wrap-Modi auf Tastendruck
 //---------------------------------------------------------------------------
 void programStep_Texturing()
 {
@@ -1645,9 +1652,12 @@ void programStep_Texturing()
 
 	// activate texture unit 0 with texture myTexture1: (sorry for the name)
 	// 2d)/4b) test different wrap modes/filters
+	static bool choice;
+	if (CG1Helper::isKeyReleased('c')) choice = !choice;
+
 	ourContext->cgActiveTexture_cgBindTexture_cgTexParameter(	0, myTexture1,
 																CGTexture2D::CG_NEAREST,
-																CGTexture2D::CG_CLAMP);
+																(choice ? CGTexture2D::CG_CLAMP : CGTexture2D::CG_REPEAT));
 	ourContext->cgUniform1i(CG_ULOC_SAMPLER, 0);
 	ourContext->cgDrawArrays(GL_TRIANGLES, 0, 2*3);
 
