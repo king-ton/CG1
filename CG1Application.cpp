@@ -1711,9 +1711,15 @@ int main(int argc, char** argv)
 //------------------------------------------------------------------------
 // Übung 12 - Aufgabe 2a  |  Variable 'testdata' erstellt
 // Übung 12 - Aufgabe 3a  |  Variable 'cube' erstellt
+// Übung 12 - Aufgabe 4c  |  Variablen für Interaktion erstellt
 //---------------------------------------------------------------------------
 TestDataSet testdata;
 CGQuadric cube;
+int		global_CameraMode		= 0; // We will hardcode three positions.
+float	global_CameraAnimation	= 0; // Camera animation parameter.
+int		global_LightMode		= 0; // We will hardcode three light positions.
+float	global_LightAnimation	= 0; // Light animation parameter.
+int		global_LightingMode		= 0; // LightING mode (per-Pixel/per-Vertex/none).
 
 //------------------------------------------------------------------------
 // Pass matrix as modelview to pipeline and update normal matrix.
