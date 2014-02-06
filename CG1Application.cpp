@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U11
+#define U12
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -1696,5 +1696,27 @@ int main(int argc, char** argv)
 	CG1Helper::runApplication();
 	return 0;
 }
+#endif
+
 //---------------------------------------------------------------------------
+// Übung 12  |  Anwendung
+//---------------------------------------------------------------------------
+#if defined(U12)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  400	// Framebuffer width.
+#define FRAME_HEIGHT 300	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Übung 12 - Aufgabe 1b  |  Funktion erstellt
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0)); //init random seed
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+	CG1Helper::setProgramStep();
+	CG1Helper::runApplication();
+	return 0;
+}
 #endif
