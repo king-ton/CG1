@@ -104,6 +104,7 @@
     <ClInclude Include="CGProgramInterface.h" />
     <ClInclude Include="CGQuadric.h" />
     <ClInclude Include="CGTexture.h" />
+    <ClInclude Include="TestDataSet.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CG1Application.cpp" />
