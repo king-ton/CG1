@@ -152,7 +152,7 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // Übung 10 - Aufgabe 2   |  Funktion erstellt
 //---------------------------------------------------------------------------
-#if defined(U10) || defined(U11)
+#if defined(U10) || defined(U11) || defined(U12)
 void perPixelLighingVertexProgram(	const CGVertexAttributes& in,
 									CGVertexVaryings& out,
 									const CGUniformData& uniforms)
@@ -201,7 +201,7 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 // Übung 10 - Aufgabe 2   |  Funktion implementiert
 // Übung 11 - Aufgabe 2e  |  Textur-Eigenschaften werden berücksichtigt
 //---------------------------------------------------------------------------
-#if defined(U10) || defined(U11)
+#if defined(U10) || defined(U11) || defined(U12)
 void perPixelLighingFragmentProgram(const CGFragmentData& in,
 	CGVec4& out,
 	const CGUniformData& uniforms)
@@ -1714,6 +1714,97 @@ int main(int argc, char** argv)
 TestDataSet testdata;
 
 //------------------------------------------------------------------------
+// Übung 12 - Aufgabe 2a  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void programStep_DataVisualization()
+{
+#pragma region Input handlers.
+	// if(CG1Helper::isKeyReleased(’1’)) ONCE_do_something_when_a_key_was_pressed();
+	// if(CG1Helper::isKeyPressed(32)) EACH_FRAME_do_something_when_a_key_is_pressed();
+	// Aufgabe 4 (a)(b)(d): Handle required inputs
+#pragma endregion
+
+#pragma region Per frame processed events (animations!) or other calculations.
+	// some_global_or_static_variable += 0.5;
+
+	// Extract center of dataset for each frame.
+	float dataCenter[3] = { testdata.maxX() / 2, testdata.maxY() / 2, testdata.maxZ() / 2 };
+#pragma endregion
+
+#pragma region CG (GL) Setup.
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+
+	// Make sure you understand what all those do, else ASK US!
+	ourContext->cgEnable(CG_DEPTH_TEST); // We need depth testing.
+	ourContext->cgEnable(CG_CULL_FACE); // We don’t need back faces.
+	// We want lights and per fragment lighting.
+	ourContext->cgUseProgram(perPixelLighingVertexProgram, perPixelLighingFragmentProgram);
+	// Aufgabe 4 (e): Set LIGHTING mode according to the global_LightingMode
+#pragma endregion
+
+#pragma region Light and material properties.
+	// Some useful float arrays.
+	float	rgbaWhite[4] = { 1.0f, 1.0f, 1.0f, 1.0f }, // pure white, alpha 1
+			rgbaGray[4] = { 0.5f, 0.5f, 0.5f, 1.0f },
+			rgbaDarkGray[4] = { 0.1f, 0.1f, 0.1f, 1.0f },
+			rgbaBlack[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	float shininess = 16.0f;
+	// Set LIGHT properties.
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_AMBIENT, 1, rgbaDarkGray);
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_DIFFUSE, 1, rgbaWhite);
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_SPECULAR, 1, rgbaGray);
+
+	// Set MATERIAL properties (until someone changes them).
+	// You can also build a setMaterialUniforms()-Function.
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaWhite);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaWhite);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaWhite);
+	ourContext->cgUniform1fv(CG_ULOC_MATERIAL_SHININESS, 1, &shininess);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaBlack);
+#pragma endregion
+
+#pragma region Projection setup.
+	float proj[16];
+	// Set a (perspective) frustum with the [-1,1]^2 rect on the nearplane at 1.0.
+	float nearDist = 1.0f, farDist = 100.0f; // Is this a good value for farDist?
+	// What would happen if we used 1000000.0f or 2.0f? Make sure you understand this, else ASK US!
+	CGMatrix4x4::getFrustum(-1.0f, 1.0f, -1.0f, 1.0f, nearDist, farDist).getFloatsToColMajor(proj);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
+#pragma endregion
+
+#pragma region View (camera) setup.
+	CGMatrix4x4 viewT; // Set camera by creating the ’view’-part of the modelview-matrix.
+	// Moving the camera is the same as moving the scene inverse.
+	// So center the scene and push it away from the camera (using two transformations).
+	// You can also use cgLookAt() here (but don’t right now).
+	viewT = CGMatrix4x4::getTranslationMatrix(-dataCenter[0], -dataCenter[1], -dataCenter[2]);
+
+	// Aufgabe 4 (g): Rotate the camera position according to the global_CameraMode and global_CameraAnimation
+
+	viewT = CGMatrix4x4::getTranslationMatrix(0, 0, -20) * viewT;
+#pragma endregion
+
+#pragma region Light position setup.
+	CGVec4 lightPos; // Light position in object space (using same coordinate frame as data).
+	lightPos.set(testdata.maxX() / 2, testdata.maxY() / 2, testdata.maxZ() * 2, 1);
+
+	// Aufgabe 4 (f): Set light position according to the global_LightMode and global_LightAnimation
+
+	// BUT the pipeline needs the eye space light position!
+	// Moving from scene object space to eye space using ModelView matrix
+	// (scene has no model transformation, so model-part is identity).
+	// Make sure you understand this, else ASK US!
+	CGVec4 lightPosES = viewT*lightPos;
+	ourContext->cgUniform4fv(CG_ULOC_LIGHT0_POSITION, 1, lightPosES.elements);
+#pragma endregion
+
+#pragma region Happy rendering.
+	// Aufgabe 3
+#pragma endregion
+}
+
+//------------------------------------------------------------------------
 // Pass matrix as modelview to pipeline and update normal matrix.
 //
 // Übung 12 - Aufgabe 1c  |  Funktion erstellt
@@ -1737,7 +1828,7 @@ int main(int argc, char** argv)
 {
 	srand(time(0)); //init random seed
 	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
-	CG1Helper::setProgramStep();
+	CG1Helper::setProgramStep(programStep_DataVisualization);
 	CG1Helper::runApplication();
 	return 0;
 }
