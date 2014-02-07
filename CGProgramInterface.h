@@ -119,20 +119,23 @@ struct CGSampler2D
 	const CGTexture2D *texture;
 };
 
-/// Uniform variables.
+//---------------------------------------------------------------------------
+// Uniform variables.
+//
+// Hausaufgabe 4 - Aufgabe 1.1b  |  Variablen hinzugefügt
+//---------------------------------------------------------------------------
 struct CGUniformData
 {
 	CGMatrix4x4 projectionMatrix, modelviewMatrix, normalMatrix;
 	CGVec4 materialAmbient, materialDiffuse, materialSpecular, materialEmission;
-	float materialShininess;
-	CGVec4 light0Ambient, light0Diffuse, light0Specular, light0Position;
+	float materialShininess, light0SpotExponent, light0SpotCutoff, light0ConstantAttenuation,
+		light0LinearAttenuation, light0QuadraticAttenuation;
+	CGVec4 sceneAmbient, light0Ambient, light0Diffuse, light0Specular, light0Position, light0SpotDirection;
 	CGSampler2D sampler;
 };
 
 /// Shader functions
 typedef void (*CGVertexProgram)(const CGVertexAttributes&, CGVertexVaryings&, const CGUniformData&);
 typedef void (*CGFragmentProgram)(const CGFragmentData&, CGVec4&, const CGUniformData&);
-
-//---------------------------------------------------------------------------
 
 #endif
