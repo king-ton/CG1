@@ -1,5 +1,5 @@
 // Welche Übung soll ausgeführt werden?
-#define U12
+#define HA4
 
 // Standard includes.
 #include <stdlib.h>         // for rand()
@@ -13,6 +13,7 @@
 //							    |  hinzugefügt
 // Hausaufgabe 3 - Aufgabe 1.2  |  CGQuadric hinzugefügt
 // Übung 12      - Aufgabe 1a   |  TestDataSet hinzugefügt
+// Hausaufgabe 4 - Aufgabe 1.2  |  CGLightSource hinzugefügt
 //---------------------------------------------------------------------------
 // Our includes.
 #include "CG1Helper.h"
@@ -22,6 +23,7 @@
 #include "CG1Application_renderSphere.h"
 #include "CGQuadric.h"
 #include "TestDataSet.h"
+#include "CGLightSource.h"
 
 //---------------------------------------------------------------------------
 // GLOBALE VARIABLEN
@@ -152,7 +154,7 @@ void perVertexLighingVertexProgram(	const CGVertexAttributes& in,
 //---------------------------------------------------------------------------
 // Übung 10 - Aufgabe 2   |  Funktion erstellt
 //---------------------------------------------------------------------------
-#if defined(U10) || defined(U11) || defined(U12)
+#if defined(U10) || defined(U11) || defined(U12) || defined(HA4)
 void perPixelLighingVertexProgram(	const CGVertexAttributes& in,
 									CGVertexVaryings& out,
 									const CGUniformData& uniforms)
@@ -201,7 +203,7 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 // Übung 10 - Aufgabe 2   |  Funktion implementiert
 // Übung 11 - Aufgabe 2e  |  Textur-Eigenschaften werden berücksichtigt
 //---------------------------------------------------------------------------
-#if defined(U10) || defined(U11) || defined(U12)
+#if defined(U10) || defined(U11) || defined(U12) || defined(HA4)
 void perPixelLighingFragmentProgram(const CGFragmentData& in,
 	CGVec4& out,
 	const CGUniformData& uniforms)
@@ -294,7 +296,7 @@ void normalVertexProgram(	const CGVertexAttributes& in,
 // Übung 08 - Aufgabe 4a  |  Funktion implementiert
 // Übung 09 - Aufgabe 1   |  Refaktorisierung 
 //---------------------------------------------------------------------------
-#if defined(U8) || defined(U9) || defined(U10) || defined(U11) || defined(HA3)
+#if defined(U8) || defined(U9) || defined(U10) || defined(U11) || defined(HA3) || defined(HA4)
 CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 	float centerX,	float centerY,	float centerZ,
 	float upX,		float upY,		float upZ)
@@ -325,7 +327,7 @@ CGMatrix4x4 cguLookAt(	float eyeX,		float eyeY,		float eyeZ,
 //---------------------------------------------------------------------------
 // Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
 //---------------------------------------------------------------------------
-#if defined(U11) || defined(U12) || defined(HA3)
+#if defined(U11) || defined(U12) || defined(HA3) || defined(HA4)
 void renderQuadric(CGQuadric &quadric)
 {
 	ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, quadric.getPositionArray());
@@ -664,6 +666,202 @@ int main(int argc, char** argv)
 
 	CG1Helper::initApplication(ourContext, 640, 640);
 	CG1Helper::setProgramStep(programStep_CGUT);
+	CG1Helper::runApplication();
+	return 0;
+}
+#endif
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 4  |  Beleuchtung
+//---------------------------------------------------------------------------
+#if defined(HA4)
+//---------------------------------------------------------------------------
+// Defines, globals, etc.
+#define FRAME_WIDTH  400	// Framebuffer width.
+#define FRAME_HEIGHT 300	// Framebuffer height.
+#define FRAME_SCALE  2		// Integer scaling factors (zoom).
+
+//---------------------------------------------------------------------------
+// Define all global values which are changed by the user input.
+//
+// Hausaufgabe 4 - Aufgabe 1.2  |  Variablen hinzugefügt
+//---------------------------------------------------------------------------
+int currentLight = 0;
+float spotCutoff = 20.0f, spotExp = 30.0f, conAtt = 1.0f, linAtt = 0.0f, quadAtt = 0.0f;
+CGQuadric base, cube, sphere, spot, spotDisk;
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 4 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+void programStep_LightingHomework()
+{
+	ourContext->cgClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	ourContext->cgClear(CG_COLOR_BUFFER_BIT | CG_DEPTH_BUFFER_BIT);
+	ourContext->cgEnable(CG_DEPTH_TEST);
+	ourContext->cgEnable(CG_CULL_FACE);
+	ourContext->cgEnable(CG_BLEND);
+	ourContext->cgUseProgram(perPixelLighingVertexProgram, perPixelLighingFragmentProgram);
+	// Set camera with view (no model yet) transformation and projection matrix.
+	CGMatrix4x4 projMat = CGMatrix4x4::getFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 50.0f);
+	float proj[16]; projMat.getFloatsToColMajor(proj);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_PROJECTION_MATRIX, 1, false, proj);
+	CGMatrix4x4 viewT = cguLookAt(10, 10, 0, 0, 0, 0, 0, 1, 0);
+	// We need MV later to transform the lights into eyespace.
+	CGMatrix4x4 modelviewT = viewT;
+	// HANDLE INPUT
+	if (CG1Helper::isKeyPressed('s')) spotCutoff--;
+	if (CG1Helper::isKeyPressed('S')) spotCutoff++;
+	if (CG1Helper::isKeyPressed('d')) spotExp--;
+	if (CG1Helper::isKeyPressed('D')) spotExp++;
+	if (CG1Helper::isKeyPressed('y')) conAtt -= 0.01;
+	if (CG1Helper::isKeyPressed('Y')) conAtt += 0.01;
+	if (CG1Helper::isKeyPressed('x')) linAtt -= 0.01;
+	if (CG1Helper::isKeyPressed('X')) linAtt += 0.01;
+	if (CG1Helper::isKeyPressed('c')) quadAtt -= 0.01;
+	if (CG1Helper::isKeyPressed('C')) quadAtt += 0.01;
+	if (CG1Helper::isKeyReleased('l')) currentLight = (currentLight + 1) % 3;
+
+	// LIGHT SETUP
+	// Animation parameter anim (again, this is not the way to do animation
+	// since it is framerate dependent. Better use time dependency!)
+	static float anim = 0.0; anim += 0.01;
+	// We define 3 light sources from which only one will be used
+	// (except if you implement the extra credit task).
+	CGLightSource lightSource[3];
+	// Light 0 will be a point light with attenuation.
+	CGVec4 lightPos; lightPos.set(cos(anim) * 5, 3, sin(anim) * 5, 1);
+	lightSource[0].setColorAmbient(0.1, 0.1, 0.1, 1.0);
+	lightSource[0].setColorDiffuse(0.5, 0.5, 0.5, 1.0);
+	lightSource[0].setColorSpecular(0.5, 0.5, 0.5, 1.0);
+	lightSource[0].setPosition((modelviewT*lightPos).elements);
+	lightSource[0].setConstantAttenuation(conAtt);
+	lightSource[0].setLinearAttenuation(linAtt);
+	lightSource[0].setQuadraticAttenuation(quadAtt);
+	// Light 1 will be a spot light using the animated position as direction.
+	CGVec4 spotPos; spotPos.set(-5, 3, -5, 1);
+	CGVec4 spotDir = CGMath::sub(lightPos, spotPos);
+	spotDir[Y] = -3; // direct downwards
+	lightSource[1].setColorAmbient(0.1, 0.1, 0.1, 1.0);
+	lightSource[1].setColorDiffuse(0.5, 0.5, 0.5, 1.0);
+	lightSource[1].setColorSpecular(0.5, 0.5, 0.5, 1.0);
+	lightSource[1].setPosition((modelviewT*spotPos).elements);
+	lightSource[1].setSpotDirection((modelviewT*spotDir).elements);
+	lightSource[1].setSpotCutoff(spotCutoff);
+	lightSource[1].setSpotExponent(spotExp);
+	// Light 2 will be a directional light.
+	lightPos[W] = 0.0f; // Use the position as vector.
+	lightSource[2].setColorAmbient(0.1, 0.1, 0.1, 1.0);
+	lightSource[2].setColorDiffuse(0.5, 0.5, 0.5, 1.0);
+	lightSource[2].setColorSpecular(0.5, 0.5, 0.5, 1.0);
+	lightSource[2].setPosition((modelviewT*lightPos).elements);
+	lightPos[W] = 1.0f; // Restore the position variable.
+	// Set only the current light source.
+	lightSource[currentLight].setupUniforms(ourContext);
+
+	// RENDER OBJECTS
+	float	rgbaWhite[4] = { 1, 1, 1, 1 },
+			rgbaBlack[4] = { 0, 0, 0, 1 },
+			rgbaYellow[4] = { 1, 1, 0, 1 },
+			rgbaRed[4] = { 1, 0, 0, 1 },
+			rgbaWhite005[4] = { 0.05f, 0.05f, 0.05f, 1.0 };
+	float shininess = 32.0f;
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaBlack);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaWhite);
+	ourContext->cgUniform1fv(CG_ULOC_MATERIAL_SHININESS, 1, &shininess);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaWhite005);
+	// Setyp scene ambient
+	ourContext->cgUniform4fv(CG_ULOC_SCENE_AMBIENT, 1, rgbaWhite005);
+	// Setup and render three different objects with their model transformations.
+	modelviewT = viewT;
+	modelviewT = modelviewT*CGMatrix4x4::getScaleMatrix(10, 10, 10);
+	modelviewT = modelviewT*CGMatrix4x4::getRotationMatrixX(-90); // equals V*S*R
+	float mv[16]; modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	// We can use the MV matrix as NM (b/c no uniform scalings, see unit 10).
+	ourContext->cgUniformMatrix4fv(CG_ULOC_NORMAL_MATRIX, 1, false, mv);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaYellow);
+	renderQuadric(base);
+	modelviewT = viewT;
+	modelviewT = modelviewT*CGMatrix4x4::getTranslationMatrix(0, 1, -5);
+	modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_NORMAL_MATRIX, 1, false, mv);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaRed);
+	renderQuadric(cube);
+	modelviewT = viewT;
+	modelviewT = modelviewT*CGMatrix4x4::getTranslationMatrix(0, 1, 5);
+	modelviewT.getFloatsToColMajor(mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+	ourContext->cgUniformMatrix4fv(CG_ULOC_NORMAL_MATRIX, 1, false, mv);
+	ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaWhite);
+	renderQuadric(sphere);
+
+	// RENDER LIGHT SOURCES (without lighting).
+	if (currentLight == 0) {
+		modelviewT = viewT;
+		modelviewT = modelviewT*CGMatrix4x4::getTranslationMatrix(lightPos[X], lightPos[Y], lightPos[Z]);
+		modelviewT = modelviewT*CGMatrix4x4::getScaleMatrix(0.1, 0.1, 0.1);
+		modelviewT.getFloatsToColMajor(mv);
+		ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaWhite);
+		// No need to pass the normal matrix *if* no normals used.
+		renderQuadric(sphere);
+	}
+	else if (currentLight == 1) {
+		// We use the cguLookAt here for a model transformation, not for the view!
+		CGMatrix4x4 spotMat = cguLookAt(spotPos[X], spotPos[Y], spotPos[Z],
+										lightPos[X], lightPos[Y] - 3, lightPos[Z],
+										0, 0, 1);
+		spotMat.invert();
+		modelviewT = viewT * spotMat;
+		float scaleFactor = tan((spotCutoff*M_PI) / 180);
+		modelviewT = modelviewT*CGMatrix4x4::getScaleMatrix(scaleFactor, scaleFactor, 1.0);
+		modelviewT.getFloatsToColMajor(mv);
+		ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaWhite);
+		renderQuadric(spot);
+		modelviewT = modelviewT*CGMatrix4x4::getRotationMatrixX(180);
+		modelviewT.getFloatsToColMajor(mv);
+		ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+		renderQuadric(spotDisk);
+	}
+	else {
+		// Use a single line primitive to represent light direction.
+		float pos[6] = { 0.0f, 0.0f, 0.0f, lightPos[X], lightPos[Y], lightPos[Z] };
+		ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, pos);
+		ourContext->cgEnable(CG_USE_BRESENHAM); // If you still use this.
+		modelviewT = viewT;
+		modelviewT.getFloatsToColMajor(mv);
+		ourContext->cgUniformMatrix4fv(CG_ULOC_MODELVIEW_MATRIX, 1, false, mv);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_AMBIENT, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_DIFFUSE, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_SPECULAR, 1, rgbaBlack);
+		ourContext->cgUniform4fv(CG_ULOC_MATERIAL_EMISSION, 1, rgbaWhite);
+		ourContext->cgDrawArrays(CG_LINES, 0, 2);
+		ourContext->cgVertexAttribPointer(CG_POSITION_ATTRIBUTE, NULL);
+	}
+	ourContext->cgDisable(CG_DEPTH_TEST);
+}
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 4 - Aufgabe 1.2  |  ProgramStep erstellt
+//---------------------------------------------------------------------------
+int main(int argc, char** argv)
+{
+	srand(time(0));
+	cube.createBox(5, 5, 5);
+	base.createDisk(72, 40);
+	sphere.createIcoSphere(3);
+	spot.createCone(32, 1);
+	spotDisk.createDisk(32, 1);
+	CG1Helper::initApplication(ourContext, FRAME_WIDTH, FRAME_HEIGHT, FRAME_SCALE);
+	CG1Helper::setProgramStep(programStep_LightingHomework);
 	CG1Helper::runApplication();
 	return 0;
 }
