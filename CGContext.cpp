@@ -166,34 +166,45 @@ void CGContext::cgUniform1i(int location, int value)
 		// case ULOC_?
 	}
 }
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 4 - Aufgabe 1.1c  |  Weitere Variablen setzen
 //---------------------------------------------------------------------------
 void CGContext::cgUniform1fv(int location, int count, const float* value)
 {
 	if(count == 1) {
 		switch(location) {
 			case CG_ULOC_MATERIAL_SHININESS: m_uniforms.materialShininess=value[0]; break;
-			// case ULOC_?
+			case CG_ULOC_LIGHT0_SPOT_EXPONENT: m_uniforms.light0SpotExponent = value[0]; break;
+			case CG_ULOC_LIGHT0_SPOT_CUTOFF: m_uniforms.light0SpotCutoff = value[0]; break;
+			case CG_ULOC_LIGHT0_CONSTANT_ATTENUATION: m_uniforms.light0ConstantAttenuation = value[0]; break;
+			case CG_ULOC_LIGHT0_LINEAR_ATTENUATION: m_uniforms.light0LinearAttenuation = value[0]; break;
+			case CG_ULOC_LIGHT0_QUADRATIC_ATTENUATION: m_uniforms.light0QuadraticAttenuation = value[0]; break;
 		}
 	}
 	else {
 		// Loop over all values and assign to m_uniforms.???[i] = value[i]
 	}
 }
+
+//---------------------------------------------------------------------------
+// Hausaufgabe 4 - Aufgabe 1.1c  |  Weitere Variablen setzen
 //---------------------------------------------------------------------------
 void CGContext::cgUniform4fv(int location, int count, const float* value)
 {
 	if(count == 1) {
 		CGVec4 vec4; vec4.set(value[0],value[1],value[2],value[3]);
 		switch(location) {
+			case CG_ULOC_SCENE_AMBIENT: m_uniforms.sceneAmbient; break;
 			case CG_ULOC_LIGHT0_AMBIENT: m_uniforms.light0Ambient = vec4; break;
 			case CG_ULOC_LIGHT0_DIFFUSE: m_uniforms.light0Diffuse = vec4; break;
 			case CG_ULOC_LIGHT0_SPECULAR: m_uniforms.light0Specular = vec4; break;
 			case CG_ULOC_LIGHT0_POSITION: m_uniforms.light0Position = vec4; break;
+			case CG_ULOC_LIGHT0_SPOT_DIRECTION: m_uniforms.light0SpotDirection = vec4; break;
 			case CG_ULOC_MATERIAL_AMBIENT: m_uniforms.materialAmbient = vec4; break;
 			case CG_ULOC_MATERIAL_DIFFUSE: m_uniforms.materialDiffuse = vec4; break;
 			case CG_ULOC_MATERIAL_SPECULAR: m_uniforms.materialSpecular = vec4; break;
 			case CG_ULOC_MATERIAL_EMISSION: m_uniforms.materialEmission = vec4; break;
-			// case ULOC_?
 		}
 	}
 	else {
