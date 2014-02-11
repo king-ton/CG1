@@ -116,6 +116,7 @@
     <ClCompile Include="CGContext_VertexOperations.cpp" />
     <ClCompile Include="CGFrameBuffer.cpp" />
     <ClCompile Include="CGImageFile.cpp" />
+    <ClCompile Include="CGLightSource.cpp" />
     <ClCompile Include="CGMatrix.cpp" />
     <ClCompile Include="CGPrimClipper.cpp" />
     <ClCompile Include="CGQuadric.cpp" />

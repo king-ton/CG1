@@ -65,6 +65,32 @@ void projectionVertexProgram(	const CGVertexAttributes& in,
 #endif
 
 //---------------------------------------------------------------------------
+// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
+//---------------------------------------------------------------------------
+#if defined(HA3)
+void normalVertexProgram(const CGVertexAttributes& in,
+	CGVertexVaryings& out,
+	const CGUniformData& uniforms)
+{
+	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
+	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
+	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
+
+	// Transform from Object Space into Eye Space.
+	out.varyings[CG_POSITION_VARYING] = uniforms.modelviewMatrix * out.varyings[CG_POSITION_VARYING];
+
+	// Transform from Eye Space into Clip Space.
+	out.varyings[CG_POSITION_VARYING] = uniforms.projectionMatrix * out.varyings[CG_POSITION_VARYING];
+
+	// Set normal as color, transformed into [0,1]-range
+	out.varyings[CG_COLOR_VARYING][R] = 0.5f * out.varyings[CG_NORMAL_VARYING][X] + 0.5f;
+	out.varyings[CG_COLOR_VARYING][G] = 0.5f * out.varyings[CG_NORMAL_VARYING][Y] + 0.5f;
+	out.varyings[CG_COLOR_VARYING][B] = 0.5f * out.varyings[CG_NORMAL_VARYING][Z] + 0.5f;
+	out.varyings[CG_COLOR_VARYING][A] = 1.0f;
+}
+#endif
+
+//---------------------------------------------------------------------------
 // Übung 08 - Aufgabe 2a  |  Vertex-Programm erstellt, Transformation der
 //						  |	 Vertex-Position mithilfe der ModelView-Matrix
 //						  |  und der Projections-Matrix
@@ -200,8 +226,10 @@ void passthroughFragmentProgram(const CGFragmentData& in,
 #endif
 
 //---------------------------------------------------------------------------
-// Übung 10 - Aufgabe 2   |  Funktion implementiert
-// Übung 11 - Aufgabe 2e  |  Textur-Eigenschaften werden berücksichtigt
+// Übung 10      - Aufgabe 2   |  Funktion implementiert
+// Übung 11      - Aufgabe 2e  |  Textur-Eigenschaften werden berücksichtigt
+// Hausaufgabe 4 - Aufgabe 2   |  Verschiedene Lichtquellenobjekte sind
+//							   |  jetzt möglich
 //---------------------------------------------------------------------------
 #if defined(U10) || defined(U11) || defined(U12) || defined(HA4)
 void perPixelLighingFragmentProgram(const CGFragmentData& in,
@@ -217,16 +245,25 @@ void perPixelLighingFragmentProgram(const CGFragmentData& in,
 	nrm = CGMath::normalize(nrm);
 
 	// Compute Blinn-Phong reflection model.
-	CGVec4 emis, ambi, diff, spec;
+	CGVec4 emis, ambiScene, ambi, diff, spec;
 	emis.set(0.0f, 0.0f, 0.0f, 0.0f); ambi.set(0.0f, 0.0f, 0.0f, 0.0f);
 	diff.set(0.0f, 0.0f, 0.0f, 0.0f); spec.set(0.0f, 0.0f, 0.0f, 0.0f);
+	ambiScene.set(0.0f, 0.0f, 0.0f, 0.0f);
+
 	// emission
 	emis = uniforms.materialEmission;
+	// ambient of the scene
+	ambiScene = CGMath::mul(uniforms.materialAmbient, uniforms.sceneAmbient);
 	// ambient
 	ambi = CGMath::mul(uniforms.materialAmbient, uniforms.light0Ambient);
 
 	// L is vector direction from current point (pos) to the light source (m_uniforms.light0Position)
-	CGVec4 L = CGMath::normalize(CGMath::sub(uniforms.light0Position, pos));
+	CGVec4 L;
+	if (uniforms.light0Position[W] == 0)
+		L = CGMath::normalize(uniforms.light0Position);
+	else
+		L = CGMath::normalize(CGMath::sub(uniforms.light0Position, pos));
+
 	// calculate dot product of nrm and L
 	float NdotL = CGMath::dot(nrm, L);
 
@@ -249,7 +286,28 @@ void perPixelLighingFragmentProgram(const CGFragmentData& in,
 	}
 
 	// sum up the final output color
-	clr = CGMath::add(CGMath::add(CGMath::add(ambi, diff), spec), emis);
+	float att, spotLight;
+	if (uniforms.light0Position[W] != 1)
+		att = 1.0F;
+	else
+		att = 1.0F / (
+		uniforms.light0ConstantAttenuation +
+		uniforms.light0LinearAttenuation * CGMath::length(CGMath::sub(uniforms.light0Position, pos)) +
+		uniforms.light0QuadraticAttenuation * pow(CGMath::length(CGMath::sub(uniforms.light0Position, pos)), 2));
+
+	if (uniforms.light0SpotCutoff == cos(180.0F))
+		spotLight = 1;
+	else {
+		CGVec4 S = CGMath::normalize(uniforms.light0SpotDirection);
+		float SdotL = CGMath::dot(S, CGMath::scale(L, -1));
+		SdotL = SdotL > 0 ? SdotL : 0;
+		if (SdotL < uniforms.light0SpotCutoff)
+			spotLight = 0.0F;
+		else
+			spotLight = pow(SdotL, uniforms.light0SpotExponent);
+	}
+
+	clr = CGMath::add(CGMath::add(CGMath::scale(CGMath::add(CGMath::add(spec, diff), ambi), (att*spotLight)), ambiScene), emis);
 
 	// Berücksichtigung der Textur-eigenschaften
 	if (uniforms.sampler.texture != NULL)
@@ -260,32 +318,6 @@ void perPixelLighingFragmentProgram(const CGFragmentData& in,
 	// clamp color values to range [0,1]
 	clr = CGMath::clamp(clr, 0, 1);
 	out = clr;
-}
-#endif
-
-//---------------------------------------------------------------------------
-// Hausaufgabe 3 - Aufgabe 1.2  |  Funktion erstellt
-//---------------------------------------------------------------------------
-#if defined(HA3)
-void normalVertexProgram(	const CGVertexAttributes& in,
-							CGVertexVaryings& out,
-							const CGUniformData& uniforms)
-{
-	out.varyings[CG_POSITION_VARYING] = in.attributes[CG_POSITION_ATTRIBUTE];
-	out.varyings[CG_NORMAL_VARYING] = in.attributes[CG_NORMAL_ATTRIBUTE];
-	out.varyings[CG_TEXCOORD_VARYING] = in.attributes[CG_TEXCOORD_ATTRIBUTE];
-
-	// Transform from Object Space into Eye Space.
-	out.varyings[CG_POSITION_VARYING] = uniforms.modelviewMatrix * out.varyings[CG_POSITION_VARYING];
-
-	// Transform from Eye Space into Clip Space.
-	out.varyings[CG_POSITION_VARYING] = uniforms.projectionMatrix * out.varyings[CG_POSITION_VARYING];
-
-	// Set normal as color, transformed into [0,1]-range
-	out.varyings[CG_COLOR_VARYING][R] = 0.5f * out.varyings[CG_NORMAL_VARYING][X] + 0.5f;
-	out.varyings[CG_COLOR_VARYING][G] = 0.5f * out.varyings[CG_NORMAL_VARYING][Y] + 0.5f;
-	out.varyings[CG_COLOR_VARYING][B] = 0.5f * out.varyings[CG_NORMAL_VARYING][Z] + 0.5f;
-	out.varyings[CG_COLOR_VARYING][A] = 1.0f;
 }
 #endif
 
